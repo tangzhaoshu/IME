@@ -7,6 +7,7 @@
 using namespace std;
 
 
+//汉字拼音统计
 class CHPY {
 public:
     string ch_str;
@@ -36,163 +37,179 @@ public:
         cout << ch_count << endl;
     }
 };
-
-map<string, int> count_CH(string str) {
-    fstream fin(str);
-    if (!fin) {
-        cout << "open file error" << endl;
-        exit(1);
-    }
-    int count = 0;
-    string sentence;
-    string temp;
-    map<string, int> chinese;
-    while (getline(fin, sentence)) {
-        for (int i = 0; i < sentence.length(); ) {
-            temp = sentence.substr(i, 3);
-            auto it = chinese.find(temp);
-            if (it != chinese.end()) {
-                chinese[temp] ++;
-            } else {
-                chinese[temp] = 1;
-            }
-            i = i + 3;
-        }
-    }
-    fin.close();
-    return chinese;
-}
-
-
-vector<string> split(string strline) {
-    vector<string> str_res;
-    int pos = 0;
-    for (int i = 0; i < strline.length(); i ++) {
-        if (strline[pos] == ' ') {
-            pos ++;
-        } else if (strline[i] == ' ') {
-            str_res.push_back(strline.substr(pos, i - pos));
-            pos = i + 1;
-        } else if (i == strline.length() - 1) {
-            str_res.push_back(strline.substr(pos, i - pos + 1));
-        }
-    }
-    return str_res;
-}
-
-
-vector<CHPY> CPTable() {
+//统计汉字次数
+class CHPYTable {
+public:
+    vector<CHPY> cp_table;
+    int total_ch;
+    int total_py;
     string datafile = "result.txt";
-    string tablefile = "CPTable.txt";
-    map<string, int> ch = count_CH(datafile);
-    fstream fin(tablefile);
-    if (!fin) {
-        cout << "open file error" << endl;
-        exit(1);
-    }
-    vector<string> strline;
-    string s, temp;
-    map<string, vector<string>> cptable;
-    while (getline(fin, s)) {
-        strline = split(s);
-        temp = strline[0];
-        strline.erase(strline.begin());
-        cptable[temp] = strline;
-    }
-    fin.close();
-    vector<CHPY> cp_set;
-    CHPY cp;
-    for (auto it = ch.begin(); it != ch.end(); it ++) {
-        cp.set_CH(it->first);
-        cp.set_count(it->second);
-        vector<string> temp_vec = cptable[it->first];
-        cp.set_PY(temp_vec);
-        cp_set.push_back(cp);
-    }
-    return cp_set;
-}
+    string mapfile = "CPTable.txt";
+    set<string> py;
+    map<string, string> pyID;
+    map<string, vector<string>> chID;
 
-bool findCH(vector<CHPY> cp_set, string str) {
-    for (auto it = cp_set.begin(); it != cp_set.end(); it ++) {
-        if ((*it).ch_str == str) {
-            return 1;
+    CHPYTable() {
+        total_ch = 0;
+        total_py = 0;
+        CPTable();
+        setpinyin();
+        setpinyinID();
+        setchineseID();
+        ofstream fout("log.txt", ofstream::app);
+        fout << "总字数: " << total_ch << "; 总拼音数：" << total_py << endl;
+        fout.close();
+    }
+
+
+    vector<string> split(string strline) {
+        vector<string> str_res;
+        int pos = 0;
+        for (int i = 0; i < strline.length(); i ++) {
+            if (strline[pos] == ' ') {
+                pos ++;
+            } else if (strline[i] == ' ') {
+                str_res.push_back(strline.substr(pos, i - pos));
+                pos = i + 1;
+            } else if (i == strline.length() - 1) {
+                str_res.push_back(strline.substr(pos, i - pos + 1));
+            }
+        }
+        return str_res;
+    }
+
+//根据句子集，将汉字与拼音进行对应。
+    void CPTable() {
+        fstream fin(datafile);
+        if (!fin) {
+            cout << "open file error" << endl;
+            exit(1);
+        }
+        int count = 0;
+        string sentence;
+        string temp;
+        map<string, int> chinese;
+        while (getline(fin, sentence)) {
+            for (int i = 0; i < sentence.length(); ) {
+                temp = sentence.substr(i, 3);
+                auto it = chinese.find(temp);
+                if (it != chinese.end()) {
+                    chinese[temp] ++;
+                } else {
+                    chinese[temp] = 1;
+                }
+                i = i + 3;
+                total_ch ++;
+            }
+        }
+        fin.close();
+
+        fin.open(mapfile);
+        if (!fin) {
+            cout << "open file error" << endl;
+            exit(1);
+        }
+        vector<string> strline;
+        map<string, vector<string>> cpmap;
+        while (getline(fin, sentence)) {
+            strline = split(sentence);
+            temp = strline[0];
+            strline.erase(strline.begin());
+            cpmap[temp] = strline;
+        }
+        fin.close();
+
+        CHPY cp;
+        for (auto it = chinese.begin(); it != chinese.end(); it ++) {
+            cp.set_CH(it->first);
+            cp.set_count(it->second);
+            vector<string> temp_vec = cpmap[it->first];
+            cp.set_PY(temp_vec);
+            cp_table.push_back(cp);
         }
     }
-    return 0;
-}
-
-string strPlus(string str) {
-    int pos = str.length() - 1;
-    while (pos >= 0) {
-        if (str[pos] + 1 <= '9') {
-            str[pos] = str[pos] + 1;
-            break;
+    
+    string strPlus(string str) {
+        int pos = str.length() - 1;
+        while (pos >= 0) {
+            if (str[pos] + 1 <= '9') {
+                str[pos] = str[pos] + 1;
+                break;
+            }
+            str[pos] = '0';
+            if (pos == 0) {
+                str = '1' + str;
+            }
+            pos --;
         }
-        str[pos] = '0';
-        if (pos == 0) {
-            str = '1' + str;
+        return str;
+    }
+
+    void setpinyin () {
+        ofstream fout("log.txt", ofstream::app);
+        for (auto it = cp_table.begin(); it != cp_table.end(); it ++) {
+            for (int i = 0; i < (*it).py_vec.size(); i ++) {
+                py.insert(((*it).py_vec)[i]);
+                fout << "汉字：" << it->ch_str << "  字数：" << it->ch_count << endl;
+            }
         }
-        pos --;
+        fout.close();
     }
-    return str;
-}
 
-set<string> pinYinTotal(vector<CHPY> cp_set) {
-    set<string> pinyin;
-    for (auto it = cp_set.begin(); it != cp_set.end(); it ++) {
-        for (int i = 0; i < (*it).py_vec.size(); i ++) {
-            pinyin.insert((*it).py_vec[i]);
+    void setpinyinID () {
+        string id = "100";
+        for (auto it = py.begin(); it != py.end(); it ++) {
+            pyID[*it] = id;
+            id = strPlus(id);
         }
+        total_py = pyID.size();
     }
-    return pinyin;
-}
 
-map<string, string> pinyinID (set<string> pinyin) {
-    map<string, string> pyid;
-    string id = "100";
-    for (auto it = pinyin.begin(); it != pinyin.end(); it ++) {
-        pyid[*it] = id;
-        id = strPlus(id);
-    }
-    return pyid;
-}
-
-map<string, map<string, int>> chineseID (map<string, string> pyid, vector<CHPY> cp_table) {
-    map<string, map<string, int>> chid;
-    pair<string, int> ch;
-    string id;
-    for (auto it = cp_table.begin(); it != cp_table.end(); it ++) {
-        for (int i = 0; i < it->py_vec.size(); i ++) {
-            id = pyid[(it->py_vec)[i]];
-            chid[id][it->ch_str] = it->ch_count / it->py_vec.size();
+    void setchineseID () {
+        string id;
+        
+        for (auto it = cp_table.begin(); it != cp_table.end(); it ++) {
+            for (int i = 0; i < it->py_vec.size(); i ++) {
+                id = pyID[(it->py_vec)[i]];
+                chID[id].push_back(it->ch_str);
+            }
         }
     }
-    return chid;
-}
 
+    vector<string> getChinese(vector<string> pystr) {
+        vector<string> chstr;
+        string id;
+        vector<string> temp;
+        for (int i = 0; i < pystr.size(); i ++) {
+            id = pyID[pystr[i]];
+            temp = chID[id];
+            for (int j = 0; j < temp.size(); j ++) {
+                chstr.push_back(temp[j]);
+            }
+        }
+        return chstr;
+    }
+
+};
+
+
+
+
+/*
 int main() {
-    map<int, map<int, int>> test;
-    test[1][2] = 3;
-    test[1][3] = 5;
-    for (auto it = test.begin(); it != test.end(); it ++) {
-        cout << it->first << ": " << endl;
-        for (auto i = it->second.begin(); i != it->second.end(); i ++) {
-            cout << "      " << i->first << " " << i->second;
-            cout << endl;
-        }
-    }
-    vector<CHPY> cp_set = CPTable();
-    cout << cp_set.size() << endl;
-    set<string> pytotal = pinYinTotal(cp_set);
-    map<string, string> pyid = pinyinID(pytotal);
+    CHPYTable *cptable = new CHPYTable();
+    cout << cptable->total_ch << "  " << cptable->total_py << endl;
+    map<string, string> pyid = cptable->pyID;
     cout << pyid.size() << endl;
-    map<string, map<string, int>> chid = chineseID(pyid, cp_set);
+    for (auto it = pyid.begin(); it != pyid.end(); it ++) {
+        cout << it->first << ":  " << it->second << endl;
+    } 
+    map<string, vector<string>> chid = cptable->chID;
     cout << chid.size() << endl;
     for (auto it = chid.begin(); it != chid.end(); it ++) {
         cout << it->first << ": " << endl;
-        for (auto i = it->second.begin(); i != it->second.end(); i ++) {
-            cout << "      " << i->first << " " << i->second;
-            cout << endl;
+        for (int i = 0; i < it->second.size(); i ++) {
+            cout << "    " << it->second[i] << endl;
         }
     }
     return 0;
@@ -202,6 +219,7 @@ int main() {
     //}
     //cout << pinyin.size() << endl;
 }
+*/
     /*
     string str = "result.txt";
     string cpfile = "CPTable.txt";
