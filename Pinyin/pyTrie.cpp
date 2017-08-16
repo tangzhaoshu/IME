@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <queue>
+#include <fstream>
 #include <stack>
 using namespace std;
 
@@ -24,9 +25,12 @@ public:
 class PYTree{
 public:
     PYNode* root;
-
-    PYTree() {
+    PYtree() {
         root = new PYNode();
+    }
+    PYTree(set<string> py) {
+        root = new PYNode();
+        creat(py);
     }
     void insert(string str) {
         PYNode* cur = root;

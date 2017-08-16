@@ -1,12 +1,216 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <stack>
+#include <conio.h>
+#include <windows.h>
 #include "pyTrie.cpp"
 using namespace std;
 
 
+class CSegNode{
+public:
+    vector<string> mSegRes;
+    PYNode* mLastPoint;
+    int flag;
+    CSegNode() {
+        flag = 1; //1:切割合理，0：切割路径不合理；
+        mLastPoint = NULL;
+    }
+
+    ~CSegNode() {
+        mLastPoint = NULL;
+    }
+    
+};
+
+
+class CSegment{
+public:
+    vector<vector<CSegNode*>> step;
+    PYTree *pytree;
+    CSegment(set<string> py) {
+        pytree = new PYTree(py);
+    }
+
+    void InputChar(string str) {
+        PYNode *cur = pytree->root;
+        PYNode *last;
+        vector<CSegNode*> segtemp;
+        CSegNode *segNodeTemp;
+        if (step.size() == 0) {
+            if (!cur->next[str[0] - 'a']) {
+                cout << "没有对应汉字" << endl;
+            } else {
+                segNodeTemp = new CSegNode();
+                last = cur->next[str[0] - 'a'];
+                segNodeTemp->mSegRes.push_back(str);
+                segNodeTemp->mLastPoint = last;
+            }
+            segtemp.push_back(segNodeTemp);
+            step.push_back(segtemp);
+        } else {
+            vector<CSegNode*> curSegment = step[step.size() - 1];
+            for (int i = 0; i < curSegment.size(); i ++) {
+                if (curSegment[i]->flag == 1) {
+                    if (!curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+                        if (cur->next[str[0] - 'a']) {
+                            segNodeTemp = new CSegNode();
+                            last = cur->next[str[0] - 'a'];
+                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+                            segNodeTemp->mSegRes.push_back(str);
+                            segNodeTemp->mLastPoint = last;
+                            segtemp.push_back(segNodeTemp);
+                        }
+                    } else {
+                        if(curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+                            segNodeTemp = new CSegNode();
+                            last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
+                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+                            string s = segNodeTemp->mSegRes.back();
+                            segNodeTemp->mSegRes.pop_back();
+                            segNodeTemp->mSegRes.push_back(s + str);
+                            segNodeTemp->mLastPoint = last;
+                            segtemp.push_back(segNodeTemp);
+                        }
+                        if (curSegment[i]->mLastPoint->flag == 1) {
+                            if (cur->next[str[0] - 'a']) {
+                                segNodeTemp = new CSegNode();
+                                last = cur->next[str[0] - 'a'];
+                                segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+                                segNodeTemp->mSegRes.push_back(str);
+                                segNodeTemp->mLastPoint = last;
+                                if (last->flag == 0) {
+                                    segNodeTemp->flag = 0;
+                                }
+                                segtemp.push_back(segNodeTemp);
+                            }
+                            
+                        }
+                    }
+                } else {
+                    if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+                        
+                        if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+                            segNodeTemp = new CSegNode();
+                            last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
+                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+                            string s = segNodeTemp->mSegRes.back();
+                            segNodeTemp->mSegRes.pop_back();
+                            segNodeTemp->mSegRes.push_back(s + str);
+                            segNodeTemp->mLastPoint = last;
+                            if (last->flag == 0) {
+                                segNodeTemp->flag = 0;
+                            }
+                            segtemp.push_back(segNodeTemp);
+                        }
+                        
+                    }
+                }
+                
+            }
+            step.push_back(segtemp);
+        }
+    }
+
+    void DeleteChar() {
+        if (step.size() == 0) {
+            return;
+        }
+        vector<CSegNode*> curSegment = step[step.size() - 1];
+        for (int i = 0; i < curSegment.size(); i ++) {
+            delete curSegment[i];
+        }
+        step.pop_back();
+    }
+    
+    void output() {
+        if (step.size() == 0) {
+            cout << "Please input string" << endl;
+            return;
+        }
+
+        vector<CSegNode*> curSegment = step[step.size() - 1];
+        cout << "       segment result as follow:     " << endl;
+        for (int i = 0; i < curSegment.size(); i ++) {
+            if (curSegment[i]->flag == 1) {
+                for (int j = 0; j < curSegment[i]->mSegRes.size(); j ++) {
+                    cout << curSegment[i]->mSegRes[j] << " ";
+                }
+                cout << endl;
+            }
+        }
+    }
+
+    vector<vector<string>> GetSegment() {
+        vector<vector<string>> result;
+        if (step.size() == 0) {
+            cout << "Please input string" << endl;
+            return result;
+        }
+        vector<string> temp;
+        vector<CSegNode*> curSegment = step[step.size() - 1];
+        for (int i = 0; i < curSegment.size(); i ++) {
+            if (curSegment[i]->flag == 1) {
+                for (int j = 0; j < curSegment[i]->mSegRes.size(); j ++) {
+                    temp.push_back(curSegment[i]->mSegRes[j]);
+                }
+                result.push_back(temp);
+                temp.clear();
+            }
+        }
+        return result;
+    }
+
+};
+/*
+int main() {
+    ofstream fout("log.txt");
+    fout << "开始程序" << endl;
+    fout.close();
+
+    CHPYTable *cptable = new CHPYTable();
+    CSegment *segment = new CSegment(cptable->py);
+    string input;
+
+    cout << "input pinyin" << endl;
+    char ch;
+    string s;
+    while (1){
+        s = "";
+        while (!kbhit()){
+        }
+        ch = getch();
+        if (27 == ch) {
+            break;
+        }
+        if (8 == ch) {
+            if (input.size() > 0) {
+                input = input.substr(0, input.size() - 1);
+                segment->DeleteChar();
+                system("cls");
+                cout << input << endl;
+                segment->output();
+                continue;
+            } else {
+                input = "";
+                system("cls");
+                continue;
+            }
+        }
+        s += ch;
+        input += ch;
+        system("cls");
+        cout << input << endl;
+        segment->InputChar(s);
+        segment->output();
+    }
+    return 0;
+}
+*/
+/*
 vector<vector<string>> seg_total;
 
 void segmentRP(string str, Node* root, vector<string> seg, int pos) {
@@ -98,7 +302,7 @@ vector<vector<string>> filter(vector<vector<string>> seg) {
     return res;
 }
 
-int getState (Node* root, string str) {
+int getState (PYNode* root, string str) {
     Node* cur = root;
     if (str.size() == 0) {
         return 0;
@@ -183,8 +387,6 @@ vector<vector<string>> segment(string str, Node* root) {
 }
 
 
-
-/*
 int main() {
     vector<CHPY> cp_set = CPTable();
     map<string, string> pyid = pinyinID(cp_set);

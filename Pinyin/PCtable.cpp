@@ -56,8 +56,22 @@ public:
         setpinyin();
         setpinyinID();
         setchineseID();
-        ofstream fout("log.txt", ofstream::app);
+        PrintLog();
+    }
+
+    void PrintLog() {
+        ofstream fout ("log.txt", ofstream::app);
         fout << "总字数: " << total_ch << "; 总拼音数：" << total_py << endl;
+        for (auto it = pyID.begin(); it != pyID.end(); it ++) {
+            fout << it->first << " " << it->second << endl;
+        }
+        for (auto it = chID.begin(); it != chID.end(); it ++) {
+            fout << it->first << "汉字如下：" << endl;
+            for (int i = 0; i < it->second.size(); i ++) {
+                fout << it->second[i] << " ";
+            }
+            fout << endl;
+        }
         fout.close();
     }
 
@@ -146,14 +160,11 @@ public:
     }
 
     void setpinyin () {
-        ofstream fout("log.txt", ofstream::app);
         for (auto it = cp_table.begin(); it != cp_table.end(); it ++) {
             for (int i = 0; i < (*it).py_vec.size(); i ++) {
                 py.insert(((*it).py_vec)[i]);
-                fout << "汉字：" << it->ch_str << "  字数：" << it->ch_count << endl;
             }
         }
-        fout.close();
     }
 
     void setpinyinID () {

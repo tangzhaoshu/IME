@@ -7,31 +7,25 @@
 #include <conio.h>
 #include <windows.h>
 #include <process.h>
+#include <algorithm>
+#include <cstdlib>
+#include <time.h>
 #include "Bigram.cpp"
-#include "PCtable.cpp"
-#include "pyTrie.cpp"
 using namespace std;
 
 /*
-int MultiByteToWideChar(
-　　UINT CodePage,
-　　DWORD dwFlags,
-　　LPCSTR lpMultiByteStr,
-　　int cchMultiByte,
-　　LPWSTR lpWideCharStr,
-　　int cchWideChar
-); 
-string UTF8ToGBK(const std::string& strUTF8)
+
+string UTF8ToGBK(const string& strUTF8)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
-    unsigned short * wszGBK = new unsigned short[len + 1];
+    unsigned short *wszGBK = new unsigned short[len + 1];
     memset(wszGBK, 0, len * 2 + 2);
-    MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUTF8.c_str(), -1, wszGBK, len);
+    MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUTF8.c_str(), -1, (LPWSTR)wszGBK, len);
 
-    len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
+    len = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)wszGBK, -1, NULL, 0, NULL, NULL);
     char *szGBK = new char[len + 1];
     memset(szGBK, 0, len + 1);
-    WideCharToMultiByte(CP_ACP,0, wszGBK, -1, szGBK, len, NULL, NULL);
+    WideCharToMultiByte(CP_ACP,0, (LPWSTR)wszGBK, -1, szGBK, len, NULL, NULL);
     //strUTF8 = szGBK;
     std::string strTemp(szGBK);
     delete[]szGBK;
@@ -39,51 +33,233 @@ string UTF8ToGBK(const std::string& strUTF8)
     return strTemp;
 }
 */
-
-
-class CHStr{
+class Path {
 public:
-    string chinese;
-    double prob;
+    int flag;  //0:表示当前路径无效
+    double _prob;
+    vector<string> _path;
     CHNode *last;
-    CHStr() {
-        chinese = "";
-        prob = 0;
+    Path() {
+        flag = 1;
+        _prob = 0;
         last = NULL;
     }
-    void set(string str, double p, CHNode *l) {
-        chinese = str;
-        prob = p;
+
+    void set (double p, CHNode *l) {
+        _prob = p;
         last = l;
+    }
+
+    ~Path(){
+        last = NULL;
+        delete[] last;
     }
 };
 
-class PYCHNode{
+class TransNode{
+public:
+    int flag; 
+    string trans_res;
+    double prob;
+    vector<Path*> path_total;
+    TransNode() {
+        flag = 0; // 0:表示非此条， 1：词条
+        trans_res = "";
+        prob = 0;
+    }
+    void set(string str, double p) {
+        trans_res = str;
+        prob = p;
+    }
+    void printlog() {
+        ofstream fout ("log.txt", ofstream::app);
+        fout << "汉字：" << trans_res << " Prob: " << prob << endl;
+        fout << "路径：" << endl;
+        for (int i = 0; i < path_total.size(); i ++) {
+            if (path_total[i]->flag == 1) {
+                for (int j = 0; j < path_total[i]->_path.size(); j ++) {
+                    fout << path_total[i]->_path[j] << " ";
+                }
+                fout << " Prob: " << path_total[i]->_prob << endl;
+            }
+        }
+        fout << endl;
+        fout.close();
+    }
+
+    ~TransNode() {
+        for (int i = 0; i < path_total.size(); i ++) {
+            delete path_total[i];
+        }
+    }
+};
+
+int cmp(const TransNode *x, const TransNode *y) {
+    return (x->prob - 100 * (x->flag)) < (y->prob - 100 * (y->flag));
+}
+
+class YJNode{
 public:
     string yinjie;
-    vector<CHStr*> ch_Total;
-    map<string, PYCHNode*> next;
-    PYCHNode() {
+    vector<TransNode*> trans_Total;
+    map<string, YJNode*> next;
+    YJNode() {
         yinjie = "";
     }
+    TransNode* getMaxProb() {
+        TransNode *temp;
+        if (trans_Total.size() > 0)  {
+            temp = trans_Total[0];
+        }
+        for (int i = 1; i < trans_Total.size(); i ++) {
+            if (trans_Total[i]->prob < temp->prob) {
+                temp = trans_Total[i];
+            }
+        }
+        return temp;
+    }
+
+    void Filter() {
+        sort(trans_Total.begin(), trans_Total.end(), cmp);
+        int size = trans_Total.size();
+        if (size > 1000) {
+            for (int i = 0; i < size - 20; i ++) {
+                delete trans_Total[trans_Total.size() - 1];
+                trans_Total.pop_back();
+            }
+        }
+    }
+
+    void print() {
+        vector<pair<string, double>> result;
+        for (int i = 0; i < trans_Total.size(); i ++){
+            trans_Total[i]->printlog();
+        }
+    }
+
 };
 
 class TranslateTree{
 public:
-    PYCHNode* head;
+    YJNode* head;
+    CHTree* chtree;
     
     TranslateTree() {
-        head = new PYCHNode();
+        head = new YJNode();
+        chtree = new CHTree();
     }
 
-    vector<CHStr*> getPinyinSeg(vector<string> pinyin, CHTree *chroot, CHPYTable *cptable , PYTree *pyroot) {
-        
-        PYCHNode* cur = head;
-        for (int i = 0; i < pinyin.size(); i ++) {
-            auto ite = cur->next.find(pinyin[i]);
-            if (ite != cur->next.end()) {
-                cur = cur->next[pinyin[i]];
-            } else {
+    void insert (YJNode *cur, vector<string> ch, string str) {
+        YJNode *yjtemp = new YJNode();
+        CHNode * chtemp;
+        TransNode *trans;
+        Path *path;
+        if (cur == head) {
+            for (int i = 0; i < ch.size(); i ++) {
+                chtemp = chtree->match(ch[i]);
+                trans = new TransNode();
+                path = new Path();
+                trans->set(chtemp->ch, chtemp->word_prob);
+                path->set(chtemp->word_prob, chtemp);
+                path->_path.push_back(ch[i]);
+                trans->path_total.push_back(path);
+                trans->flag  = 1;
+                yjtemp->trans_Total.push_back(trans);
+            }
+            yjtemp->yinjie = str;
+            cur->next[str] = yjtemp;
+        } else {
+            for (int i = 0; i < ch.size(); i ++) {
+                for (auto tr = cur->trans_Total.begin(); tr != cur->trans_Total.end(); tr ++) {
+                    trans = new TransNode();
+                    double min = 10000000;
+                    for (int j = 0; j < (*tr)->path_total.size(); j ++) {
+                        chtemp = (*tr)->path_total[j]->last;
+                        auto cur_ch = chtemp->nextword.find(ch[i]);
+                        if (cur_ch != chtemp->nextword.end()) {
+                            trans->flag = (*tr)->flag;
+                            if ((*tr)->path_total[j]->flag == 1) {
+                                path = new Path();
+                                path->_path = (*tr)->path_total[j]->_path;
+                                path->_path.push_back(ch[i]);
+                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->trans_prob;
+                                path->last = chtree->match(ch[i]);
+                                trans->path_total.push_back(path);
+                                if (path->_prob < min) {
+                                    min = path->_prob;
+                                }
+                            }
+                            if (cur_ch->second->flag == 1) {
+                                path = new Path();
+                                path->_path = (*tr)->path_total[j]->_path;
+                                path->_path.pop_back();
+                                path->_path.push_back(cur_ch->second->ch);
+                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
+                                            - chtemp->word_prob; 
+                                path->last = cur_ch->second;
+                                trans->path_total.push_back(path);
+                                if (path->_prob < min) {
+                                    min = path->_prob;
+                                }
+                            } else {
+                                path = new Path();
+                                path->_path.pop_back();
+                                path->_path.push_back(cur_ch->second->ch);
+                                path->_path = (*tr)->path_total[j]->_path;
+                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
+                                            - chtemp->word_prob; 
+                                path->last = cur_ch->second;
+                                path->flag = 0;
+                                trans->path_total.push_back(path);
+                            }
+                        } else {
+                            chtemp = chtree->match(ch[i]);
+                            path = new Path();
+                            path->_path = (*tr)->path_total[j]->_path;
+                            path->_path.push_back(ch[i]);
+                            path->_prob = (*tr)->path_total[j]->_prob + chtemp->word_prob;
+                            path->last = chtemp;
+                            trans->path_total.push_back(path);
+                            if (path->_prob < min) {
+                                min = path->_prob;
+                            }
+                            trans->flag = 0;
+                        }
+                    }
+                    trans->trans_res = (*tr)->trans_res + ch[i];
+                    trans->prob = min;
+                    yjtemp->trans_Total.push_back(trans);
+                }
+            }
+        }
+        yjtemp->Filter();
+        yjtemp->yinjie = str;
+        cur->next[str] = yjtemp;
+    }
+
+
+
+    vector<YJNode*> getTranslate(vector<vector<string>> pyseg, vector<vector<string>> candCH) {
+        vector<YJNode*> result;
+        YJNode *cur;
+        for (int i = 0; i < pyseg.size(); i ++) {
+            cur = head;
+            for (int j = 0; j < pyseg[i].size(); j ++) {
+                auto ite = cur->next.find(pyseg[i][j]);
+                if (ite != cur->next.end()) {
+                    cur = cur->next[pyseg[i][j]];
+                } else {
+                    insert(cur, candCH[i], pyseg[i][j]);
+                    cur = cur->next[pyseg[i][j]];
+                }
+            }
+            result.push_back(cur);
+        }
+        return result;
+    }
+
+};
+/*
                 if (cur == head) {
                     vector<string> py = pyroot->getpy(pinyin[i]);
                     vector<string> ch = cptable->getChinese(py);
@@ -134,7 +310,8 @@ public:
                             }
                         }
                     }
-                    if (pychnode->ch_Total.size() == 0) {
+                
+/*                    if (pychnode->ch_Total.size() == 0) {
                         string str;
                         for (int j = 0; j < ch.size(); j ++) {
                             if (j == 0) {
@@ -159,15 +336,39 @@ public:
                         CHStr *tempstr = new CHStr();
                         tempstr->set(chstr->chinese + str, chstr->prob + chtemp->prob, chtemp);
                         pychnode->ch_Total.push_back(tempstr);
+                    }        
+                    if (pychnode->ch_Total.size() == 0) {
+                        process.push_back(cur);
+                        i --;
+                        cur = head;
+                    } else {
+                        cur->next[pinyin[i]] = pychnode;
+                        cur = cur->next[pinyin[i]];
                     }
-                    cur->next[pinyin[i]] = pychnode;
-                    cur = cur->next[pinyin[i]];
+                    
                 }
             }
         }
-        return cur->ch_Total;
-    }
-};
+
+        process.push_back(cur);
+        string comp = "";
+        double compprob = 0;
+        if (process.size() > 1) {
+            for (int i = 0; i < process.size(); i ++) {
+                comp += process[i]->getMaxProb()->chinese;
+                compprob += process[i]->getMaxProb()->prob;
+            }
+            result[comp] = compprob;
+        }
+        for (int i = 0; i < process[0]->ch_Total.size(); i ++) {
+            result[process[0]->ch_Total[i]->chinese] = process[0]->ch_Total[i]->prob;
+        }
+       */
+
+
+
+
+
 /*
 double getPorb(NodeCH* root, string str1, string str2) {
     if (str1.size() < 3) {
@@ -240,28 +441,35 @@ string translate(vector<string> pinyin, NodeCH *root, map<string, vector<string>
     return str;
 }
 */
+//int cmpYJNode(const pair<string, double> &x, const pair<string, double> &y) {
+//    return x.second < y.second;
+//}
+
+
+/*
 int main() {
     ofstream fout("log.txt");
     fout << "开始程序" << endl;
     fout.close();
 
     CHPYTable *cptable = new CHPYTable();
-    cout << "chinese number: " << cptable->total_ch << endl;
-    cout << "pinyin number: " << cptable->total_py << endl;
-    string input;
-    cout << "input pinyin" << endl;
-    PYTree *pytree = new PYTree();
-    pytree->creat(cptable->py);
+    PYTree *pytree = new PYTree(cptable->py);
     CHTree *chtree = new CHTree();
     TranslateTree *tran = new TranslateTree();
 
+    string input;
+    cout << "input pinyin" << endl;
+    
 
 
-    vector<CHStr*> res;
+
+    YJNode *res;
+    vector<vector<YJNode*>> step;
+    vector<YJNode*> temp;
     vector<vector<string>> seg;
     char ch;
-    while (cin >> input){
-        /*
+    while (1){
+        
         while (!kbhit()){
         }
         ch = getch();
@@ -269,15 +477,18 @@ int main() {
             break;
         }
         if (8 == ch) {
-            if (input.size() > 0) {
+            if (input.size() > 1) {
                 input = input.substr(0, input.size() - 1);
+            } else {
+                input = "";
+                system("cls");
+                continue;
             }
         } else {
             input += ch;
         }
         system("cls");
         cout << input << endl;
-        */
 
         seg = pytree->segment(input);
 
@@ -293,14 +504,46 @@ int main() {
         }
         fout.close();
 
+        SYSTEMTIME sys;
+        GetLocalTime(&sys);
+        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+        cout << endl;
 
         for (int i = 0; i < seg.size(); i ++) {
-            res = tran->getPinyinSeg(seg[i], chtree, cptable, pytree);
-            cout << res.size() << endl;
-            for (int j = 0; j < res.size(); j ++) {
-                cout << res[j]->chinese << " " << res[j]->prob << endl;
+            res = tran->getPinyinSeg(seg[i], cptable, pytree);
+            temp.push_back(res);
+        }
+
+        GetLocalTime(&sys);
+        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+        cout << endl;
+
+        vector<pair<string, double>> output;
+        int flag;
+        for (int i = 0; i < temp.size(); i ++) {
+            temp[i]->print();
+            flag = 0;
+            for (int j = 0; j < temp[i]->trans_Total.size(); j ++) {
+                if (temp[i]->trans_Total[j]->flag == 1) {
+                    output.push_back(make_pair(temp[i]->trans_Total[j]->trans_res, 
+                    temp[i]->trans_Total[j]->prob));
+                    flag = 1;
+                } else {
+                    if (flag == 0) {
+                        output.push_back(make_pair(temp[i]->trans_Total[j]->trans_res, 
+                        temp[i]->trans_Total[j]->prob));
+                        flag = 1;
+                    }
+                }
             }
         }
+        sort(output.begin(), output.end(), cmpYJNode);
+        for(int i = 0; i < output.size(); i ++) {
+            cout << UTF8ToGBK(output[i].first) <<  "Prob: " << output[i].second<< endl;
+        }
+        step.push_back(temp);
+        temp.clear();
     }
     return 0;
 }
+*/
