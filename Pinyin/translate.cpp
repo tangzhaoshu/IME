@@ -4,18 +4,18 @@
 #include <map>
 #include <set>
 #include <string>
+#include <stack>
 #include <conio.h>
 #include <windows.h>
 #include <process.h>
 #include <algorithm>
 #include <cstdlib>
+#include <math.h>
 #include <time.h>
 #include "Bigram.cpp"
 using namespace std;
 
-/*
-
-string UTF8ToGBK(const string& strUTF8)
+string UTF8ToGBK1(const string& strUTF8)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
     unsigned short *wszGBK = new unsigned short[len + 1];
@@ -32,10 +32,11 @@ string UTF8ToGBK(const string& strUTF8)
     delete[]wszGBK;
     return strTemp;
 }
-*/
+
 class Path {
 public:
     int flag;  //0:表示当前路径无效
+    int state;  //表示当前拼接状态，0表示非拼接，1表示上个词为拼接所得
     double _prob;
     vector<string> _path;
     CHNode *last;
@@ -43,6 +44,7 @@ public:
         flag = 1;
         _prob = 0;
         last = NULL;
+        state = 0;
     }
 
     void set (double p, CHNode *l) {
@@ -58,22 +60,69 @@ public:
 
 class TransNode{
 public:
-    int flag; 
+    int minSeg; 
     string trans_res;
     double prob;
     vector<Path*> path_total;
     TransNode() {
-        flag = 0; // 0:表示非此条， 1：词条
+        minSeg = 0; // 最小切分数
         trans_res = "";
         prob = 0;
     }
-    void set(string str, double p) {
+    void set(string str) {
         trans_res = str;
-        prob = p;
     }
+
+    void insertPath(Path *p) {
+        if (p->flag == 0) {
+            path_total.push_back(p);
+            return;
+        }
+        if (prob == 0) {
+            path_total.push_back(p);
+            prob = p->_prob;
+            minSeg = p->_path.size();
+            return;
+        }
+        Path *temp;
+        for (int i = 0; i < path_total.size(); i ++) {
+            if (p->last == path_total[i]->last) {
+                if (p->_prob < path_total[i]->_prob) {
+                    temp = path_total[i];
+                    path_total[i] = p;
+                    delete temp;
+                    if (p->_prob < prob) {
+                        minSeg = p->_path.size();
+                        prob = p->_prob;
+                    }
+                    return;
+                } else if (fabs(p->_prob - path_total[i]->_prob) < 0.0000001) {
+                    if (path_total[i]->_path.size() > p->_path.size()) {
+                        temp = path_total[i];
+                        path_total[i] = p;
+                        delete temp;
+                        minSeg = p->_path.size();
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+        }
+        path_total.push_back(p);
+        if (p->_prob < prob) {
+            prob = p->_prob;
+            minSeg = p->_path.size();
+        } else if (fabs(p->_prob - prob) < 0.0000001) {
+            if (p->_path.size() < minSeg) {
+                minSeg = p->_path.size();
+            }
+        }
+    }
+
     void printlog() {
         ofstream fout ("log.txt", ofstream::app);
-        fout << "汉字：" << trans_res << " Prob: " << prob << endl;
+        fout << "汉字：" << trans_res << " Prob: " << prob << " 最小拼接数： " << minSeg << endl;
         fout << "路径：" << endl;
         for (int i = 0; i < path_total.size(); i ++) {
             if (path_total[i]->flag == 1) {
@@ -94,18 +143,47 @@ public:
     }
 };
 
+
 int cmp(const TransNode *x, const TransNode *y) {
-    return (x->prob - 100 * (x->flag)) < (y->prob - 100 * (y->flag));
+    if (x->minSeg < y->minSeg) {
+        return 1;
+    } else if (x->minSeg > y->minSeg) {
+        return 0;
+    }
+    return x->prob < y->prob;
 }
 
 class YJNode{
 public:
     string yinjie;
+    int MinSplit;
     vector<TransNode*> trans_Total;
     map<string, YJNode*> next;
     YJNode() {
+        MinSplit = 0;
         yinjie = "";
     }
+
+    ~YJNode() {
+        for (auto ite = next.begin(); ite != next.end(); ite ++) {
+            delete ite->second;
+        }
+        for (int i = 0; i < trans_Total.size(); i ++) {
+            delete trans_Total[i];
+        }
+    }
+
+    void InsertTrans(TransNode* t) {
+        if (MinSplit == 0) {
+            MinSplit = t->minSeg;
+        } else if (t->minSeg < MinSplit) {
+            MinSplit = t->minSeg;
+        }
+        trans_Total.push_back(t);
+        return;
+    }
+
+
     TransNode* getMaxProb() {
         TransNode *temp;
         if (trans_Total.size() > 0)  {
@@ -119,11 +197,15 @@ public:
         return temp;
     }
 
+
+
     void Filter() {
+        int limit = 1000;
         sort(trans_Total.begin(), trans_Total.end(), cmp);
         int size = trans_Total.size();
-        if (size > 1000) {
-            for (int i = 0; i < size - 20; i ++) {
+        cout << size << endl;
+        if (size > limit) {
+            for (int i = 0; i < size - limit; i ++) {
                 delete trans_Total[trans_Total.size() - 1];
                 trans_Total.pop_back();
             }
@@ -131,7 +213,9 @@ public:
     }
 
     void print() {
+
         vector<pair<string, double>> result;
+        
         for (int i = 0; i < trans_Total.size(); i ++){
             trans_Total[i]->printlog();
         }
@@ -154,40 +238,49 @@ public:
         CHNode * chtemp;
         TransNode *trans;
         Path *path;
-        if (cur == head) {
+        int limit = 1000;
+        set<double> Minset;
+        if (cur == head) {  
             for (int i = 0; i < ch.size(); i ++) {
                 chtemp = chtree->match(ch[i]);
                 trans = new TransNode();
                 path = new Path();
-                trans->set(chtemp->ch, chtemp->word_prob);
+                trans->set(chtemp->ch);
                 path->set(chtemp->word_prob, chtemp);
                 path->_path.push_back(ch[i]);
-                trans->path_total.push_back(path);
-                trans->flag  = 1;
-                yjtemp->trans_Total.push_back(trans);
+                trans->insertPath(path);
+                yjtemp->InsertTrans(trans);
             }
             yjtemp->yinjie = str;
             cur->next[str] = yjtemp;
         } else {
-            for (int i = 0; i < ch.size(); i ++) {
+            for (int i = 0; i < ch.size(); i ++) {     //遍历所有汉字
+                // 遍历上次输入的汉字翻译结果
                 for (auto tr = cur->trans_Total.begin(); tr != cur->trans_Total.end(); tr ++) {
+                    /*
+                    if (Minset.size() > limit) {   // 定义最大堆来控制遍历次数
+                        auto maxite = Minset.end();
+                        maxite --;
+                        if ((*tr)->prob > *maxite) {
+                            continue;
+                        }
+                    }
+                    */
                     trans = new TransNode();
                     double min = 10000000;
+                    //遍历路径寻找最小概率路径
                     for (int j = 0; j < (*tr)->path_total.size(); j ++) {
                         chtemp = (*tr)->path_total[j]->last;
                         auto cur_ch = chtemp->nextword.find(ch[i]);
                         if (cur_ch != chtemp->nextword.end()) {
-                            trans->flag = (*tr)->flag;
+                  //          cout << UTF8ToGBK1(cur_ch->second->ch) << " ";
                             if ((*tr)->path_total[j]->flag == 1) {
                                 path = new Path();
                                 path->_path = (*tr)->path_total[j]->_path;
                                 path->_path.push_back(ch[i]);
                                 path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->trans_prob;
                                 path->last = chtree->match(ch[i]);
-                                trans->path_total.push_back(path);
-                                if (path->_prob < min) {
-                                    min = path->_prob;
-                                }
+                                trans->insertPath(path);
                             }
                             if (cur_ch->second->flag == 1) {
                                 path = new Path();
@@ -197,41 +290,73 @@ public:
                                 path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
                                             - chtemp->word_prob; 
                                 path->last = cur_ch->second;
-                                trans->path_total.push_back(path);
-                                if (path->_prob < min) {
-                                    min = path->_prob;
-                                }
+                                trans->insertPath(path);
                             } else {
                                 path = new Path();
+                                path->_path = (*tr)->path_total[j]->_path;
                                 path->_path.pop_back();
                                 path->_path.push_back(cur_ch->second->ch);
                                 path->_path = (*tr)->path_total[j]->_path;
                                 path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
-                                            - chtemp->word_prob; 
+                                            - chtemp->word_prob;
                                 path->last = cur_ch->second;
                                 path->flag = 0;
-                                trans->path_total.push_back(path);
+                                trans->insertPath(path);
                             }
                         } else {
-                            chtemp = chtree->match(ch[i]);
-                            path = new Path();
-                            path->_path = (*tr)->path_total[j]->_path;
-                            path->_path.push_back(ch[i]);
-                            path->_prob = (*tr)->path_total[j]->_prob + chtemp->word_prob;
-                            path->last = chtemp;
-                            trans->path_total.push_back(path);
-                            if (path->_prob < min) {
-                                min = path->_prob;
+                            if ((*tr)->path_total[j]->flag == 1) {
+                                if ((*tr)->path_total[j]->state == 0) {
+                                    chtemp = chtree->match(ch[i]);
+                                    path = new Path();
+                                    path->_path = (*tr)->path_total[j]->_path;
+                                    path->_path.push_back(ch[i]);
+                                    path->_prob = (*tr)->path_total[j]->_prob + chtemp->word_prob;
+                                    path->last = chtemp;
+                                    path->state = 1;
+                                    trans->insertPath(path);
+                                }
                             }
-                            trans->flag = 0;
+                            
                         }
                     }
-                    trans->trans_res = (*tr)->trans_res + ch[i];
-                    trans->prob = min;
-                    yjtemp->trans_Total.push_back(trans);
+   //                 if (trans->path_total.size() != 0) {
+     //                   trans->trans_res = (*tr)->trans_res + ch[i];
+       //                 yjtemp->trans_Total.push_back(trans);
+         //           } else {
+           //             delete trans;
+             //       }
+                    if (trans->minSeg > cur->MinSplit + 2) {
+                        delete trans;
+                    } else {
+                        if (Minset.size() > limit) {
+                            auto maxite = Minset.end();
+                            maxite --;
+                            if (trans->path_total.size() != 0 && trans->prob < *maxite) {
+                                Minset.erase(maxite);
+                                Minset.insert(trans->prob);
+                                trans->trans_res = (*tr)->trans_res + ch[i];
+                                yjtemp->InsertTrans(trans);
+                            } else {
+                                delete trans;
+                            }
+                        } else {
+                            if (trans->path_total.size() != 0) {
+                                Minset.insert(trans->prob);
+                                trans->trans_res = (*tr)->trans_res + ch[i];
+                                yjtemp->InsertTrans(trans);
+                            } else {
+                                delete trans;
+                            }
+                        }
+                    }
+                    
                 }
             }
         }
+        SYSTEMTIME sys;
+        GetLocalTime(&sys);
+        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+        cout << endl;
         yjtemp->Filter();
         yjtemp->yinjie = str;
         cur->next[str] = yjtemp;
@@ -253,9 +378,53 @@ public:
                     cur = cur->next[pyseg[i][j]];
                 }
             }
+            cout << cur->trans_Total.size() << endl;
             result.push_back(cur);
         }
         return result;
+    }
+
+    void DeleteYJ(vector<vector<string>> yjpath) {
+        YJNode* cur;
+        YJNode* temp;
+        for (int i = 0; i < yjpath.size(); i ++) {
+            cur = head;
+            for (int j = 0; j < yjpath[i].size() - 1; j ++) {
+                cur = cur->next[yjpath[i][j]];
+            }
+            temp = cur->next[yjpath[i].back()];
+            auto ite = cur->next.find(yjpath[i].back());
+            cur->next.erase(ite);
+            delete temp;
+        }
+    }
+
+    void ShowTreePath() {
+        ofstream fout ("log.txt", ofstream::app);
+        fout << "---------------------------音节路径------------------------" << endl;
+        stack<YJNode*> nodestack;
+        stack<int > step;
+        int steptemp = 0;
+        YJNode* temp;
+        nodestack.push(head);
+        step.push(0);
+        while(!nodestack.empty()) {
+            steptemp = step.top() + 1;
+            for (int i = 0; i < step.top(); i ++) {
+                fout << "   ";
+            }
+            step.pop();
+            temp = nodestack.top();
+            nodestack.pop();
+            fout << temp->yinjie << endl;
+            for (auto ite = temp->next.rbegin(); ite != temp->next.rend(); ite ++) {
+                nodestack.push(ite->second);
+                step.push(steptemp);
+            }
+        }
+        fout << "---------------------------音节路径------------------------" << endl;
+        fout << endl;
+        fout.close();
     }
 
 };

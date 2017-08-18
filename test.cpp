@@ -4,6 +4,9 @@
 #include <fstream>
 #include <process.h>
 #include <string>
+#include <set>
+#include <vector>
+#include <time.h>
 using namespace std;
 int GetDirection()
 {
@@ -58,36 +61,19 @@ string UTF8ToGBK(const string& strUTF8)
 
  
 int main()
-{
-    fstream fin("Pinyin/result.txt");
-    if (!fin) {
-        cout << "open file error" << endl;
-        exit(1);
+{   
+    set<int>
+    SYSTEMTIME sys;
+    GetLocalTime(&sys);
+    printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+    cout << endl;
+    vector<int> test;
+    for (int i = 0; i < 200000; i ++) {
+        test.push_back(i);
     }
-    string str;
-    getline(fin, str);
-    cout << UTF8ToGBK(str) << endl;
-    fin.close();
-    char ch;
-    while (1){
-        while (!kbhit()){
-        }
-        
-        ch = getch();
-        if (27 == ch) {
-            break;
-        }
-        if (8 == ch) {
-            if (str.size() > 0) {
-                str = str.substr(0, str.size() - 1);
-            }
-        } else {
-            str += ch;
-        }
-        system("cls");
-        cout << str;
-    }
-    
-    system("pause");
+    GetLocalTime(&sys);
+    printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+    cout << endl;
     return 0;
 }
+

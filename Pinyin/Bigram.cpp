@@ -2,8 +2,10 @@
 #include<map>
 #include<vector>
 #include<string>
+#include<stack>
 #include<fstream>
 #include<cmath>
+#include "Entry.cpp"
 using namespace std;
 
 class CHNode {
@@ -39,11 +41,13 @@ class CHTree {
 public:
     double total;
     CHNode *root;
+    CEntryTree *entryTree;
     string datafile = "result.txt";
 
     CHTree() {
         total = 0;
         root = new CHNode();
+        entryTree = new CEntryTree();
         biGramTree();
         PrintLog();
     }
@@ -51,9 +55,19 @@ public:
     void PrintLog() {
         ofstream fout ("log.txt", ofstream::app);
         fout << "总词条个数：" << total << endl;
-        for (auto ite = root->nextword.begin(); ite != root->nextword.end(); ite ++) {
-            fout << ite->second->ch << " 字数：" << ite->second->word_count << " 概率："
-            << ite->second->word_prob << endl;
+        stack<CHNode*> nodestack;
+        CHNode* temp;
+        nodestack.push(root);
+        while(!nodestack.empty()) {
+            temp = nodestack.top();
+            nodestack.pop();
+            if (temp->flag == 1) {
+                fout << temp->ch << "  次数： " << temp->word_count << "  概率： " <<
+                temp->word_prob << endl;
+            }
+            for (auto ite = temp->nextword.begin(); ite != temp->nextword.end(); ite ++) {
+                nodestack.push(ite->second);
+            }
         }
         fout.close();
     }
@@ -69,18 +83,20 @@ public:
             cur = cur->nextword[str.substr(i, 3)];
             i = i + 3;
         }
+        if (str.size() == 3 || entryTree->Find(str)) {
+            cur->flag = 1;
+            cur->word_count ++;
+            total ++;
+        }
         cur->ch = str;
-        cur->flag = 1;
         cur->gram_count ++;
-        cur->word_count ++;
-        total ++;
     }
 
     void getProb(CHNode* root) {
         CHNode* cur = root;
         for (auto ite = cur->nextword.begin(); ite != cur->nextword.end(); ite ++) {
             ite->second->trans_prob = log(ite->second->gram_count / cur->gram_count) * (- 1);
-            ite->second->word_prob = log(ite->second->word_count / total) * (- 1);
+            ite->second->word_prob = log(ite->second->gram_count / total) * (- 1);
             getProb(ite->second);
         }
     }

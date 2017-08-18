@@ -16,7 +16,6 @@
 using namespace std;
 
 
-
 string UTF8ToGBK(const string& strUTF8)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
@@ -34,6 +33,8 @@ string UTF8ToGBK(const string& strUTF8)
     delete[]wszGBK;
     return strTemp;
 }
+
+
 
 int cmpYJNode(const pair<string, double> &x, const pair<string, double> &y) {
     return x.second < y.second;
@@ -54,6 +55,7 @@ int main() {
     vector<string> temp;
     vector<YJNode*> translateResult;
     vector<pair<string, double>> output;
+    vector<vector<pair<string, double>>> step;
 
     string input;
     cout << "input pinyin" << endl;
@@ -65,68 +67,91 @@ int main() {
         ch = getch();
         if (27 == ch) {
             break;
-        }
-        if (8 == ch) {
+        } else if (8 == ch) {
             if (input.size() > 0) {
                 input = input.substr(0, input.size() - 1);
+                trans->DeleteYJ(segment->GetSegment());
                 segment->DeleteChar();
                 system("cls");
                 cout << input << endl;
                 segment->output();
-                continue;
+                step.pop_back();
+                if (step.size() > 0) {
+                    for(int i = 0; i < step.back().size(); i ++) {
+                        cout << UTF8ToGBK(step.back()[i].first) << endl;
+                    }
+                }
+                segment->Log();
+                trans->ShowTreePath();
             } else {
                 input = "";
                 system("cls");
-                continue;
             }
-        }
-        s += ch;
-        input += ch;
-        system("cls");
-        cout << input << endl;
-        segment->InputChar(s);
-        segment->output();
-        segResult = segment->GetSegment();
-        candidateCH.clear();
-        output.clear();
+        } else if (ch >= 'a' && ch <= 'z') {
+            s += ch;
+            input += ch;
+            system("cls");
+            cout << input << endl;
+            
+            candidateCH.clear();
+            output.clear();
+    
+            SYSTEMTIME sys;
+            
 
-        SYSTEMTIME sys;
-        GetLocalTime(&sys);
-        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
-        cout << endl;
-        for (int i = 0; i < segResult.size(); i ++) {
-            temp = segment->pytree->getpy(segResult[i].back());
-            temp = cptable->getChinese(temp);
-            candidateCH.push_back(temp);
-        }
-        translateResult = trans->getTranslate(segResult, candidateCH);
-        GetLocalTime(&sys);
-        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
-        cout << endl;
+            segment->InputChar(s);
+            segment->output();
+            segResult = segment->GetSegment();
+            segment->Log();
 
-        
-        int flag;
-        for (int i = 0; i < translateResult.size(); i ++) {
-            translateResult[i]->print();
-            flag = 0;
-            for (int j = 0; j < translateResult[i]->trans_Total.size(); j ++) {
-                if (translateResult[i]->trans_Total[j]->flag == 1) {
-                    output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res, 
-                        translateResult[i]->trans_Total[j]->prob));
-                    flag = 1;
-                } else {
-                    if (flag == 0) {
+
+            for (int i = 0; i < segResult.size(); i ++) {
+                temp = segment->pytree->getpy(segResult[i].back());
+                temp = cptable->getChinese(temp);
+                candidateCH.push_back(temp);
+            }
+
+            GetLocalTime(&sys);
+            printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+            cout << endl;
+
+            translateResult = trans->getTranslate(segResult, candidateCH);
+
+            GetLocalTime(&sys);
+            printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+            cout << endl;
+
+            trans->ShowTreePath();
+
+            
+            
+            int flag;
+            for (int i = 0; i < translateResult.size(); i ++) {
+                translateResult[i]->print();
+                flag = 0;
+                for (int j = 0; j < translateResult[i]->trans_Total.size(); j ++) {
+                    if (translateResult[i]->trans_Total[j]->minSeg == 1) {
                         output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res, 
-                        translateResult[i]->trans_Total[j]->prob));
+                            translateResult[i]->trans_Total[j]->prob));
                         flag = 1;
+                    } else {
+                        if (flag == 0) {
+                            output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res, 
+                            translateResult[i]->trans_Total[j]->prob));
+                            flag = 1;
+                        }
                     }
                 }
             }
+            sort(output.begin(), output.end(), cmpYJNode);
+            for(int i = 0; i < output.size(); i ++) {
+                cout << UTF8ToGBK(output[i].first) << endl;
+            }
+            cout << endl;
+            step.push_back(output);
         }
-        sort(output.begin(), output.end(), cmpYJNode);
-        for(int i = 0; i < output.size(); i ++) {
-            cout << UTF8ToGBK(output[i].first) <<  "Prob: " << output[i].second<< endl;
-        }
+        
+        
 
     }
     return 0;

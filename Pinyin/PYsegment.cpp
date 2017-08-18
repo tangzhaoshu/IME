@@ -5,6 +5,7 @@
 #include <string>
 #include <stack>
 #include <conio.h>
+#include <fstream>
 #include <windows.h>
 #include "pyTrie.cpp"
 using namespace std;
@@ -163,6 +164,23 @@ public:
         }
         return result;
     }
+
+    void Log() {
+        vector<vector<string>> result = GetSegment();
+        ofstream fout("log.txt", ofstream::app);
+        fout << "---------------------音节切分-------------------------" << endl;
+        for (int i = 0; i < result.size(); i ++) {
+            fout << "切分线路" << i << ": ";
+            for (int j = 0; j < result[i].size(); j ++) {
+                fout << result[i][j] << "'";
+            }
+            fout << endl;
+        }
+        fout << "---------------------音节切分-------------------------" << endl;
+        fout << endl;
+        fout.close();
+    }
+
 
 };
 /*

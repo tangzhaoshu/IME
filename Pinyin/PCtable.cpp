@@ -37,6 +37,11 @@ public:
         cout << ch_count << endl;
     }
 };
+
+int cmpCHCount(const pair<string, double> &x, const pair<string, double> &y) {
+    return x.second < y.second;
+}
+
 //统计汉字次数
 class CHPYTable {
 public:
@@ -47,7 +52,7 @@ public:
     string mapfile = "CPTable.txt";
     set<string> py;
     map<string, string> pyID;
-    map<string, vector<string>> chID;
+    map<string, vector<pair<string, int>>> chID;
 
     CHPYTable() {
         total_ch = 0;
@@ -68,7 +73,7 @@ public:
         for (auto it = chID.begin(); it != chID.end(); it ++) {
             fout << it->first << "汉字如下：" << endl;
             for (int i = 0; i < it->second.size(); i ++) {
-                fout << it->second[i] << " ";
+                fout << it->second[i].first << " ";
             }
             fout << endl;
         }
@@ -182,21 +187,24 @@ public:
         for (auto it = cp_table.begin(); it != cp_table.end(); it ++) {
             for (int i = 0; i < it->py_vec.size(); i ++) {
                 id = pyID[(it->py_vec)[i]];
-                chID[id].push_back(it->ch_str);
+                chID[id].push_back(make_pair(it->ch_str, it->ch_count));
             }
         }
     }
 
     vector<string> getChinese(vector<string> pystr) {
         vector<string> chstr;
+        vector<pair<string, int>> chinfo;
         string id;
-        vector<string> temp;
         for (int i = 0; i < pystr.size(); i ++) {
             id = pyID[pystr[i]];
-            temp = chID[id];
-            for (int j = 0; j < temp.size(); j ++) {
-                chstr.push_back(temp[j]);
+            for (int j = 0; j < chID[id].size(); j ++) {
+                chinfo.push_back(chID[id][j]);
             }
+        }
+        sort(chinfo.begin(), chinfo.end(), cmpCHCount);
+        for (int i = 0; i < chinfo.size(); i ++) {
+            chstr.push_back(chinfo[i].first);
         }
         return chstr;
     }
