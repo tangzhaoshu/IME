@@ -1,0 +1,139 @@
+﻿生成启动时间为 2017/8/29 14:10:02。
+     1>项目“C:\Users\Administrator\Desktop\IME\IME\IME\IME.vcxproj”在节点 2 上(Rebuild 个目标)。
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Bigram.cpp Entry.cpp main.cpp PYsegment.cpp pyToCH.cpp pyTrie.cpp
+         pyTrie.cpp
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(41): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(54): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(73): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(110): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(111): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(115): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(116): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(128): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(169): warning C4018: “>”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(206): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(208): warning C4018: “<”: 有符号/无符号不匹配
+         pyToCH.cpp
+         PYsegment.cpp
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(41): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(54): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(73): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(110): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(111): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(115): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(116): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(128): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(169): warning C4018: “>”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(206): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(208): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(58): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(125): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(139): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(141): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(157): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(159): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(173): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(175): warning C4018: “<”: 有符号/无符号不匹配
+         main.cpp
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(76): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(88): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(113): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(170): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(189): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(200): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(202): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pctable.hpp(207): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(41): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(54): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(73): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(110): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(111): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(115): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(116): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(128): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(169): warning C4018: “>”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(206): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pytrie.cpp(208): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(58): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(125): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(139): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(141): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(157): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(159): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(173): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\pysegment.cpp(175): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(30): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(57): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(79): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(114): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(115): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(132): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(144): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(135): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(138): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(172): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(201): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(211): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(214): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(221): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(233): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(270): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(312): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(319): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(323): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(349): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(373): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(403): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(431): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(444): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(452): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(540): warning C4553: “==”: 运算符不起任何作用；是否是有意使用“=”的?
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(596): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(602): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(620): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(628): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(630): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(657): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(667): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(669): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\translate.hpp(775): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\main.cpp(81): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\main.cpp(113): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\main.cpp(133): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\main.cpp(135): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\main.cpp(161): warning C4018: “<”: 有符号/无符号不匹配
+         Entry.cpp
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(30): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(57): warning C4018: “<”: 有符号/无符号不匹配
+         Bigram.cpp
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(30): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\entry.cpp(57): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(79): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(114): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(115): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(132): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\ime\ime\bigram.cpp(144): warning C4018: “<”: 有符号/无符号不匹配
+         正在生成代码...
+       Link:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Administrator\Desktop\IME\IME\Debug\IME.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Administrator\Desktop\IME\IME\Debug\IME.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Administrator\Desktop\IME\IME\Debug\IME.lib" /MACHINE:X86 Debug\Bigram.obj
+         Debug\Entry.obj
+         Debug\main.obj
+         Debug\PYsegment.obj
+         Debug\pyToCH.obj
+         Debug\pyTrie.obj
+         IME.vcxproj -> C:\Users\Administrator\Desktop\IME\IME\Debug\IME.exe
+     1>已完成生成项目“C:\Users\Administrator\Desktop\IME\IME\IME\IME.vcxproj”(Rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:05.62

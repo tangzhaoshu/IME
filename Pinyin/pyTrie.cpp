@@ -32,6 +32,9 @@ public:
         root = new PYNode();
         creat(py);
     }
+
+    
+
     void insert(string str) {
         PYNode* cur = root;
         for (int i = 0; i < str.size(); i ++) {

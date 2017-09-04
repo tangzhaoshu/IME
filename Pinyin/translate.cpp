@@ -35,21 +35,56 @@ string UTF8ToGBK1(const string& strUTF8)
 
 class Path {
 public:
-    int flag;  //0:表示当前路径无效
+    int flag;  //0:表示当前路径无效，词条中间状态
+    int gram;  //当前路径的gram次数
+    int joint; //当前路径的拼接次数
     int state;  //表示当前拼接状态，0表示非拼接，1表示上个词为拼接所得
-    double _prob;
+    int _prob;
     vector<string> _path;
     CHNode *last;
     Path() {
+        joint = 0;
+        gram = 0;
         flag = 1;
         _prob = 0;
         last = NULL;
         state = 0;
     }
+    Path(const Path *p) {
+        flag = p->flag;
+        gram = p->gram;
+        joint = p->joint;
+        state = p->state;
+        _prob = p->_prob;
+        _path = p->_path;
+        last = p->last;
+    }
+
+    void popAndPush(string str) {
+        _path.pop_back();
+        _path.push_back(str);
+    }
+
+    void push(string str) {
+        _path.push_back(str);
+    }
 
     void set (double p, CHNode *l) {
         _prob = p;
         last = l;
+    }
+
+    void addGram() {
+        gram ++;
+    }
+
+    void addJoint() {
+        joint ++;
+    }
+
+    void setstate(int s, int f) {
+        state = s;
+        flag = f;
     }
 
     ~Path(){
@@ -58,6 +93,22 @@ public:
     }
 };
 
+int cmpPath(const Path *x, const Path *y) {
+    if (x->gram + x->joint + 1 < y->gram + y->joint) {
+        return 1;
+    } else if (x->gram + x->joint > y->gram + y->joint + 1) {
+        return 0;
+    } else {
+        if (x->joint < y->joint) {
+            return 1;
+        } else if (x->joint > y->joint){
+            return 0;
+        } else {
+            return x->_prob < y->_prob;
+        }
+    }
+}
+
 class TransNode{
 public:
     int minSeg; 
@@ -65,7 +116,7 @@ public:
     double prob;
     vector<Path*> path_total;
     TransNode() {
-        minSeg = 0; // 最小切分数
+        minSeg = 0; // 最小词条个数
         trans_res = "";
         prob = 0;
     }
@@ -73,7 +124,40 @@ public:
         trans_res = str;
     }
 
-    void insertPath(Path *p) {
+    void setMinNum() {
+        if (path_total.size() == 0) {
+            minSeg = 0;
+            prob = 0;
+            return;
+        }
+        sort(path_total.begin(), path_total.end(), cmpPath);
+        int i = 0;
+        while (i < path_total.size() && path_total[i]->flag == 0) {
+            i ++;
+        }
+        if (i < path_total.size()) {
+            minSeg = path_total[i]->_path.size();
+            prob = path_total[i]->_prob;
+        } else {
+            minSeg = 0;
+            prob = 0;
+        }
+    }
+
+    void deletePath(Path *p) {
+        Path *temp;
+        for (auto ite = path_total.begin(); ite != path_total.end(); ite ++) {
+            if (*ite == p) {
+                temp = *ite;
+                delete temp;
+                ite = path_total.erase(ite);
+                setMinNum();
+                return;
+            }
+        }
+    }
+
+    void insertPath(Path *p) {   //节点重合时合并路径
         if (p->flag == 0) {
             path_total.push_back(p);
             return;
@@ -87,11 +171,11 @@ public:
         Path *temp;
         for (int i = 0; i < path_total.size(); i ++) {
             if (p->last == path_total[i]->last) {
-                if (p->_prob < path_total[i]->_prob) {
+                if (p->_prob - path_total[i]->_prob < -0.0000001) {
                     temp = path_total[i];
                     path_total[i] = p;
                     delete temp;
-                    if (p->_prob < prob) {
+                    if (p->_prob - prob < -0.000001) {
                         minSeg = p->_path.size();
                         prob = p->_prob;
                     }
@@ -105,12 +189,13 @@ public:
                         return;
                     }
                 } else {
+                    delete p;
                     return;
                 }
             }
         }
         path_total.push_back(p);
-        if (p->_prob < prob) {
+        if (p->_prob - prob < -0.000001) {
             prob = p->_prob;
             minSeg = p->_path.size();
         } else if (fabs(p->_prob - prob) < 0.0000001) {
@@ -122,14 +207,23 @@ public:
 
     void printlog() {
         ofstream fout ("log.txt", ofstream::app);
-        fout << "汉字：" << trans_res << " Prob: " << prob << " 最小拼接数： " << minSeg << endl;
+        fout << "汉字：" << trans_res << " Prob: " << prob << " 最小词条个数： " << minSeg << endl;
         fout << "路径：" << endl;
         for (int i = 0; i < path_total.size(); i ++) {
             if (path_total[i]->flag == 1) {
+                fout << "有效路径： ";
                 for (int j = 0; j < path_total[i]->_path.size(); j ++) {
                     fout << path_total[i]->_path[j] << " ";
                 }
-                fout << " Prob: " << path_total[i]->_prob << endl;
+                fout << " Prob: " << path_total[i]->_prob << ";  ";
+                fout << " Ngram次数：" << path_total[i]->gram << " 拼接次数： " << path_total[i]->joint << endl;
+            } else {
+                fout << "无效路径： ";
+                for (int j = 0; j < path_total[i]->_path.size(); j ++) {
+                    fout << path_total[i]->_path[j] << " ";
+                }
+                fout << " Prob: " << path_total[i]->_prob << ";  ";
+                fout << " Ngram次数：" << path_total[i]->gram << " 拼接次数： " << path_total[i]->joint << endl;
             }
         }
         fout << endl;
@@ -145,9 +239,15 @@ public:
 
 
 int cmp(const TransNode *x, const TransNode *y) {
-    if (x->minSeg < y->minSeg) {
+    if (x->minSeg == 1 && y->minSeg > 1) {
         return 1;
-    } else if (x->minSeg > y->minSeg) {
+    }
+    if (y->minSeg == 1 && x->minSeg > 1) {
+        return 0;
+    }
+    if (x->minSeg + 1 < y->minSeg) {
+        return 1;
+    } else if (x->minSeg > y->minSeg + 1) {
         return 0;
     }
     return x->prob < y->prob;
@@ -173,14 +273,99 @@ public:
         }
     }
 
+    void deleteTrans(TransNode *t) {
+        if (trans_Total.size() == 0) {
+            return;
+        }
+        TransNode *temp = NULL;
+        if (trans_Total.size() == 1) {
+            temp = trans_Total[0];
+            delete temp;
+            trans_Total.clear();
+            MinSplit = 0;
+        } else {
+            for (auto ite = trans_Total.begin(); ite != trans_Total.end(); ite ++) {
+                if (*ite == t) {
+                    temp = *ite;
+                    delete temp;
+                    ite = trans_Total.erase(ite);
+                    return;
+                }
+            }
+        }
+    }
+
     void InsertTrans(TransNode* t) {
+    //    cout << 3 << UTF8ToGBK1(t->trans_res) << endl;
+        if (t->minSeg == 0) {
+            trans_Total.push_back(t);
+            return;
+        }
         if (MinSplit == 0) {
+            MinSplit = t->minSeg;
+            trans_Total.push_back(t);
+            return;
+        } else if (t->minSeg > MinSplit + 1) {
+            delete t;
+            return;
+        }
+        vector<Path*> waitDelete;
+        int index = 0;
+        Path *temp;
+        while (index < t->path_total.size()) {
+            
+            if (t->path_total[index]->flag == 0) {
+                index ++;
+                continue;
+            }
+            int flag = 0;
+            for (int i = 0; i < trans_Total.size(); i ++) {
+                if (flag == 1) {
+                    break;
+                }
+                for (int j = 0; j < trans_Total[i]->path_total.size(); j ++) {
+                    temp = trans_Total[i]->path_total[j];
+                    if (temp->flag == 1 && t->path_total[index]->last == temp->last) {
+           //             cout << UTF8ToGBK1(t->path_total[index]->last->ch) << " "
+            //            << UTF8ToGBK1(trans_Total[i]->trans_res) << 3 << endl;
+                        if (cmpPath(t->path_total[index], trans_Total[i]->path_total[j])) {
+                            if (trans_Total[i]->path_total.size() == 1) {
+                                deleteTrans(trans_Total[i]);
+                            } else {
+                                trans_Total[i]->deletePath(temp);
+                            }
+                        } else {
+                            if (t->path_total.size() == 1) {
+                                delete t;
+                                return;
+                            } else {
+                                waitDelete.push_back(t->path_total[index]);
+                            }
+                        }
+                        flag = 1;
+                        break;
+                    }
+                }
+            }
+            index ++;
+        }
+        for (int i = 0; i < waitDelete.size(); i ++) {
+            t->deletePath(waitDelete[i]);
+        }
+        if (t->path_total.size() == 0) {
+            delete t;
+            return;
+        }
+        if (t->minSeg == 0) {
+            trans_Total.push_back(t);
+            return;
+        }
+        if (MinSplit == 0 ) {
             MinSplit = t->minSeg;
         } else if (t->minSeg < MinSplit) {
             MinSplit = t->minSeg;
         }
         trans_Total.push_back(t);
-        return;
     }
 
 
@@ -200,14 +385,21 @@ public:
 
 
     void Filter() {
-        int limit = 1000;
+       
+       // cout << trans_Total.size() << endl;
+        int limit = 3000;
         sort(trans_Total.begin(), trans_Total.end(), cmp);
         int size = trans_Total.size();
-        cout << size << endl;
-        if (size > limit) {
-            for (int i = 0; i < size - limit; i ++) {
-                delete trans_Total[trans_Total.size() - 1];
-                trans_Total.pop_back();
+        int index = 1;
+        for (auto ite = trans_Total.begin(); ite != trans_Total.end(); ite ++) {
+            if (index > limit) {
+                for (auto itemp = ite; itemp != trans_Total.end(); itemp ++) {
+                    delete *itemp;
+                }
+                trans_Total.erase(ite, trans_Total.end());
+                break;
+            } else {
+                index += (*ite)->path_total.size();
             }
         }
     }
@@ -220,10 +412,9 @@ public:
             trans_Total[i]->printlog();
         }
     }
-
 };
 
-class TranslateTree{
+class TranslateTree {
 public:
     YJNode* head;
     CHTree* chtree;
@@ -238,9 +429,12 @@ public:
         CHNode * chtemp;
         TransNode *trans;
         Path *path;
-        int limit = 1000;
-        set<double> Minset;
-        if (cur == head) {  
+        int limit = 3000;
+        int g = 0;
+        int c = 0;
+        int joint = 0;
+        set<int> Minset;
+        if (cur == head) {
             for (int i = 0; i < ch.size(); i ++) {
                 chtemp = chtree->match(ch[i]);
                 trans = new TransNode();
@@ -255,68 +449,115 @@ public:
             cur->next[str] = yjtemp;
         } else {
             for (int i = 0; i < ch.size(); i ++) {     //遍历所有汉字
+       //         cout << "字： " << UTF8ToGBK1(ch[i]) << endl;
+                int optFlag = 1;
                 // 遍历上次输入的汉字翻译结果
                 for (auto tr = cur->trans_Total.begin(); tr != cur->trans_Total.end(); tr ++) {
-                    /*
-                    if (Minset.size() > limit) {   // 定义最大堆来控制遍历次数
-                        auto maxite = Minset.end();
-                        maxite --;
-                        if ((*tr)->prob > *maxite) {
-                            continue;
-                        }
-                    }
-                    */
                     trans = new TransNode();
-                    double min = 10000000;
                     //遍历路径寻找最小概率路径
+              //      cout << UTF8ToGBK1((*tr)->trans_res) << " ";
                     for (int j = 0; j < (*tr)->path_total.size(); j ++) {
                         chtemp = (*tr)->path_total[j]->last;
                         auto cur_ch = chtemp->nextword.find(ch[i]);
                         if (cur_ch != chtemp->nextword.end()) {
-                  //          cout << UTF8ToGBK1(cur_ch->second->ch) << " ";
-                            if ((*tr)->path_total[j]->flag == 1) {
-                                path = new Path();
-                                path->_path = (*tr)->path_total[j]->_path;
-                                path->_path.push_back(ch[i]);
-                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->trans_prob;
-                                path->last = chtree->match(ch[i]);
-                                trans->insertPath(path);
-                            }
+
+                //            cout << 1 << UTF8ToGBK1(cur_ch->second->ch) << endl;
+
                             if (cur_ch->second->flag == 1) {
-                                path = new Path();
-                                path->_path = (*tr)->path_total[j]->_path;
+                                path = new Path((*tr)->path_total[j]);
                                 path->_path.pop_back();
+                                int p = 0.0;
+                                int p2, p1;
+                                if (path->_path.size() > 0) {
+                                    if (chtree->Find(path->_path.back() + chtemp->ch)) {
+                                        p1 = chtree->match(path->_path.back() + chtemp->ch)->trans_prob;
+                                        if (chtree->Find(path->_path.back() + cur_ch->second->ch)) {
+                                            CHNode *c = chtree->match(path->_path.back() + cur_ch->second->ch);
+                                            double probtemp = static_cast<double>(c->gram_count) / static_cast<double>(chtree->match(path->_path.back())->gram_count);
+                                            p2 = log(probtemp) * (-1);
+                                        } else {
+                                            p2 = cur_ch->second->word_prob;
+                                            path->gram --;
+                                            path->joint ++;
+                                        }
+                                    } else {
+                                        p1 = chtemp->word_prob;
+                                        p2 = cur_ch->second->word_prob;
+                                    }
+                                } else {
+                                    p1 = chtemp->word_prob;
+                                    p2 = cur_ch->second->word_prob;
+                                }
+                                p = p + p2 - p1;
                                 path->_path.push_back(cur_ch->second->ch);
-                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
-                                            - chtemp->word_prob; 
-                                path->last = cur_ch->second;
+                                path->set((*tr)->path_total[j]->_prob + p, cur_ch->second);
+                                path->setstate(0, 1);
                                 trans->insertPath(path);
                             } else {
-                                path = new Path();
-                                path->_path = (*tr)->path_total[j]->_path;
-                                path->_path.pop_back();
-                                path->_path.push_back(cur_ch->second->ch);
-                                path->_path = (*tr)->path_total[j]->_path;
-                                path->_prob = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
-                                            - chtemp->word_prob;
-                                path->last = cur_ch->second;
-                                path->flag = 0;
-                                trans->insertPath(path);
-                            }
-                        } else {
-                            if ((*tr)->path_total[j]->flag == 1) {
-                                if ((*tr)->path_total[j]->state == 0) {
-                                    chtemp = chtree->match(ch[i]);
-                                    path = new Path();
-                                    path->_path = (*tr)->path_total[j]->_path;
-                                    path->_path.push_back(ch[i]);
-                                    path->_prob = (*tr)->path_total[j]->_prob + chtemp->word_prob;
-                                    path->last = chtemp;
-                                    path->state = 1;
+                                if (chtree->entryTree->Find(cur_ch->second->ch) != 2) {
+                                    path = new Path((*tr)->path_total[j]);
+                                    path->_path.pop_back();
+                                    int p = 0.0;
+                                    int p2 = 0.0;
+                                    int p1 = 0.0;
+                                    if (path->_path.size() > 0) {
+                                        
+                                        if (chtree->Find(path->_path.back() + chtemp->ch)) {
+                                            p1 = chtree->match(path->_path.back() + chtemp->ch)->trans_prob;
+                                            if (chtree->Find(path->_path.back() + cur_ch->second->ch)) {
+                                                CHNode *c = chtree->match(path->_path.back() + cur_ch->second->ch);
+                                                double probtemp = static_cast<double>(c->gram_count) / static_cast<double>(chtree->match(path->_path.back())->gram_count);
+                                                p2 = log(probtemp) * (-1);
+                                              //  p2 = log(c->gram_count / chtree->match(path->_path.back())->gram_count) * (-1);
+                                                if (p2 < 0) {
+                                                    p2 = 0;
+                                                }
+                                            } else {
+                                                p2 = cur_ch->second->word_prob;
+                                                path->gram --;
+                                                path->joint ++;
+                                            }
+                                        } else {
+                                            p1 = chtemp->word_prob;
+                                            p2 = cur_ch->second->word_prob;
+                                        }
+                                    } else {
+                                        p1 = chtemp->word_prob;
+                                        p2 = cur_ch->second->word_prob;
+                                    }
+                                    p = p + p2 - p1;
+                                    
+                                    path->_path.push_back(cur_ch->second->ch);
+                                    path->set((*tr)->path_total[j]->_prob + p, cur_ch->second);
+                                    path->setstate(0, 0);
                                     trans->insertPath(path);
                                 }
                             }
-                            
+                            if ((*tr)->path_total[j]->flag == 1) {
+                                path = new Path((*tr)->path_total[j]);
+                                path->push(ch[i]);
+                                path->set((*tr)->path_total[j]->_prob + cur_ch->second->trans_prob, chtree->match(ch[i]));
+                                path->addGram();
+                                path->setstate(0, 1);
+                                trans->insertPath(path);
+                                optFlag == 0;
+                            }
+                        } else {
+                            if (optFlag == 0) {
+                                continue;
+                            }
+                            if ((*tr)->path_total[j]->flag == 1) {
+                                if ((*tr)->path_total[j]->state == 0) {
+                                    chtemp = chtree->match(ch[i]);
+                                    path = new Path((*tr)->path_total[j]);
+                                    path->push(ch[i]);
+                                    path->set((*tr)->path_total[j]->_prob + chtemp->word_prob, chtemp);
+                                    path->addJoint();
+                                    path->setstate(0, 1);
+                                    trans->insertPath(path);
+                                    optFlag = 0;
+                                }
+                            }
                         }
                     }
    //                 if (trans->path_total.size() != 0) {
@@ -328,74 +569,131 @@ public:
                     if (trans->minSeg > cur->MinSplit + 2) {
                         delete trans;
                     } else {
-                        if (Minset.size() > limit) {
-                            auto maxite = Minset.end();
-                            maxite --;
-                            if (trans->path_total.size() != 0 && trans->prob < *maxite) {
-                                Minset.erase(maxite);
-                                Minset.insert(trans->prob);
-                                trans->trans_res = (*tr)->trans_res + ch[i];
-                                yjtemp->InsertTrans(trans);
-                            } else {
-                                delete trans;
-                            }
+                        if (trans->path_total.size() != 0) {
+                            Minset.insert(trans->prob);
+                            trans->trans_res = (*tr)->trans_res + ch[i];
+                            yjtemp->InsertTrans(trans);
                         } else {
-                            if (trans->path_total.size() != 0) {
-                                Minset.insert(trans->prob);
-                                trans->trans_res = (*tr)->trans_res + ch[i];
-                                yjtemp->InsertTrans(trans);
-                            } else {
-                                delete trans;
-                            }
+                            delete trans;
                         }
                     }
-                    
                 }
             }
         }
-        SYSTEMTIME sys;
-        GetLocalTime(&sys);
-        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
-        cout << endl;
+    //    cout << g << " " << c << " " << joint << endl;
+   //     SYSTEMTIME sys;
+    //    GetLocalTime(&sys);
+    //    printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
         yjtemp->Filter();
         yjtemp->yinjie = str;
         cur->next[str] = yjtemp;
     }
 
-
+    void FilterTranslate(vector<YJNode*> total) {
+        if (total.size() == 0) {
+            return;
+        }
+        vector<vector<TransNode*>::iterator> ite;
+        int limit = 3000;
+        for (int i = 0; i < total.size(); i ++) {
+            ite.push_back(total[i]->trans_Total.begin());
+        }
+        int pos;
+        for (int i = 0; i < limit; i ++) {
+            pos = -1;
+            for (int j = 0; j < ite.size(); j ++) {
+                if (ite[j] == total[j]->trans_Total.end()) {
+                    continue;
+                }
+                if (pos == -1) {
+                    pos = j;
+                } else {
+                    if (cmp(*(ite[pos]), *(ite[j])) == 0) {
+                        pos = j;
+                    }
+                }
+            }
+            if(pos == -1) {
+                break;
+            }
+            i += (*ite[pos])->path_total.size() - 1;
+            ite[pos] ++;
+        }
+        for (int i = 0; i < total.size(); i ++) {
+            for (auto tempite = ite[i]; tempite != total[i]->trans_Total.end(); tempite ++) {
+                delete *tempite;
+            }
+            total[i]->trans_Total.erase(ite[i], total[i]->trans_Total.end());
+        }
+    }
 
     vector<YJNode*> getTranslate(vector<vector<string>> pyseg, vector<vector<string>> candCH) {
         vector<YJNode*> result;
         YJNode *cur;
+        int flag;
         for (int i = 0; i < pyseg.size(); i ++) {
             cur = head;
-            for (int j = 0; j < pyseg[i].size(); j ++) {
+            flag = 1;
+            for (int j = 0; j < pyseg[i].size() - 1; j ++) {
                 auto ite = cur->next.find(pyseg[i][j]);
                 if (ite != cur->next.end()) {
                     cur = cur->next[pyseg[i][j]];
                 } else {
-                    insert(cur, candCH[i], pyseg[i][j]);
-                    cur = cur->next[pyseg[i][j]];
+                    flag = 0;
+                    break;
+           //         insert(cur, candCH[i], pyseg[i][j]);
+             //       cur = cur->next[pyseg[i][j]];
                 }
             }
-            cout << cur->trans_Total.size() << endl;
+            if (flag == 0) {
+                continue;
+            }
+            auto ite = cur->next.find(pyseg[i].back());
+            if (ite != cur->next.end()) {
+                cur = cur->next[pyseg[i].back()];
+            } else {
+                insert(cur, candCH[i], pyseg[i].back());
+                cur = cur->next[pyseg[i].back()];
+            }
             result.push_back(cur);
         }
+        
+        //SYSTEMTIME sys;
+        //GetLocalTime(&sys);
+        //printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+        //cout << endl;
+
+        FilterTranslate(result);
+        //int sum = 0;
+        //for (int i = 0; i < result.size(); i ++) {
+        //    sum += result[i]->trans_Total.size();
+       // }
+        //cout << sum << endl;
         return result;
     }
 
     void DeleteYJ(vector<vector<string>> yjpath) {
         YJNode* cur;
         YJNode* temp;
+        int flag;
         for (int i = 0; i < yjpath.size(); i ++) {
             cur = head;
+            flag = 1;
             for (int j = 0; j < yjpath[i].size() - 1; j ++) {
-                cur = cur->next[yjpath[i][j]];
+                auto ite = cur->next.find(yjpath[i][j]);
+                if (ite != cur->next.end()) {
+                    cur = cur->next[yjpath[i][j]];
+                } else {
+                    flag = 0;
+                    break;
+                }
             }
-            temp = cur->next[yjpath[i].back()];
-            auto ite = cur->next.find(yjpath[i].back());
-            cur->next.erase(ite);
-            delete temp;
+            if (flag == 1) {
+                temp = cur->next[yjpath[i].back()];
+                auto ite = cur->next.find(yjpath[i].back());
+                delete temp;
+                cur->next.erase(ite);
+            }
         }
     }
 

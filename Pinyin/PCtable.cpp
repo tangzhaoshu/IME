@@ -4,6 +4,7 @@
 #include<set>
 #include<map>
 #include<vector>
+#include<algorithm>
 using namespace std;
 
 
@@ -39,7 +40,7 @@ public:
 };
 
 int cmpCHCount(const pair<string, double> &x, const pair<string, double> &y) {
-    return x.second < y.second;
+    return x.second > y.second;
 }
 
 //统计汉字次数
@@ -76,6 +77,23 @@ public:
                 fout << it->second[i].first << " ";
             }
             fout << endl;
+        }
+        fout.close();
+
+
+        fout.open("pysource.txt");
+        for (auto ite = pyID.begin(); ite != pyID.end(); ite ++) {
+            fout << ite->first << endl;
+            fout << ite->second <<endl;
+        }
+        fout.close();
+        fout.open("chsource.txt");
+        for (auto ite = chID.begin(); ite != chID.end(); ite ++) {
+            for (int i = 0; i < ite->second.size(); i ++) {
+                fout << ite->first << endl;
+                fout << ite->second[i].first << endl;
+                fout << ite->second[i].second << endl;
+            }
         }
         fout.close();
     }
@@ -213,24 +231,15 @@ public:
 
 
 
-
 /*
 int main() {
     CHPYTable *cptable = new CHPYTable();
     cout << cptable->total_ch << "  " << cptable->total_py << endl;
     map<string, string> pyid = cptable->pyID;
     cout << pyid.size() << endl;
-    for (auto it = pyid.begin(); it != pyid.end(); it ++) {
-        cout << it->first << ":  " << it->second << endl;
-    } 
-    map<string, vector<string>> chid = cptable->chID;
-    cout << chid.size() << endl;
-    for (auto it = chid.begin(); it != chid.end(); it ++) {
-        cout << it->first << ": " << endl;
-        for (int i = 0; i < it->second.size(); i ++) {
-            cout << "    " << it->second[i] << endl;
-        }
-    }
+//    for (auto it = pyid.begin(); it != pyid.end(); it ++) {
+ //       cout << it->first << ":  " << it->second << endl;
+ //   } 
     return 0;
   //  set<string> pinyin = pinYinTotal();
    // for (auto it = pinyin.begin(); it != pinyin.end(); it ++) {
@@ -238,8 +247,6 @@ int main() {
     //}
     //cout << pinyin.size() << endl;
 }
-*/
-    /*
     string str = "result.txt";
     string cpfile = "CPTable.txt";
     set<string> pinyin;

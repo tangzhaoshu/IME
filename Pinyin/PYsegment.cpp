@@ -43,7 +43,8 @@ public:
         CSegNode *segNodeTemp;
         if (step.size() == 0) {
             if (!cur->next[str[0] - 'a']) {
-                cout << "没有对应汉字" << endl;
+                cout << "input error" << endl;
+                return;
             } else {
                 segNodeTemp = new CSegNode();
                 last = cur->next[str[0] - 'a'];
@@ -126,6 +127,15 @@ public:
         }
         step.pop_back();
     }
+
+    void clear() {
+        if (step.size() == 0) {
+            return;
+        }
+        while (step.size() != 0) {
+            DeleteChar();
+        }
+    }
     
     void output() {
         if (step.size() == 0) {
@@ -183,6 +193,7 @@ public:
 
 
 };
+
 /*
 int main() {
     ofstream fout("log.txt");

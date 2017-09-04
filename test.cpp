@@ -4,10 +4,45 @@
 #include <fstream>
 #include <process.h>
 #include <string>
+#include <sstream>
 #include <set>
+#include <map>
 #include <vector>
 #include <time.h>
 using namespace std;
+
+
+class CHNode {
+public:
+    string ch;
+    int trans_prob;
+    int word_prob;
+    int flag;  //1:表示当前为词条， 0表示为非此条
+    map<string, CHNode*> nextword;
+
+    CHNode() {
+        flag = 0;
+        ch = "hellow wor奥斯卡的福利卡时间到了副科级lasdfasdfasdfasdfasfasdfd";
+    }
+
+    void PrintLog() {
+        //ofstream fout ("log.txt", ofstream::app);
+        //fout << ch << " 词条个数：" << word_count << endl;
+        //fout.close();
+    }
+};
+
+class TestNode{
+public:
+    string str;
+    TestNode(string s) {
+        str = s;
+    }
+    ~TestNode(){
+        cout << "delete  " << str << endl;
+    }
+};
+
 int GetDirection()
 {
     int ret = 0;
@@ -59,21 +94,81 @@ string UTF8ToGBK(const string& strUTF8)
     return strTemp;
 }
 
+
  
 int main()
 {   
-    set<int>
+    fstream fin("testdata.txt");
+    if (!fin) {
+        cout << "open file error" << endl;
+        exit(1);
+    }
+    vector<string> result;
+    string str;
+    getline(fin, str);
+    const char* cstr = str.c_str();
+    cout << cstr << endl;
+    cout << strlen(cstr) << endl;
+    char *c1 = "123";
+    char *c2 = "423";
+    cout << c1 << endl;
+    /*
+    std::stringstream ss;
+    string str;
+    map<string, int> test_map;
+    for (int i = 0; i < 10; i ++) {
+        ss.clear();
+        ss << i;
+        ss >> str;
+        test_map[str] = i;
+    }
+    cout << test_map.size() << endl;
+    cout << sizeof(test_map) << endl;
+    cout << sizeof(*test_map.begin()) << endl;
+    */
+    Sleep(10000);
+    /*
+    CHNode *chnode = new CHNode();
+    cout << sizeof(*chnode) << endl;
+    cout << chnode->ch << endl;
+    string tstring = "阿斯顿阿斯顿发生尽快了解a";
+    cout << sizeof(tstring) << '1' << endl;
+    cout << tstring.capacity() << endl;
+    vector<TestNode> test;
+    map<string, TestNode*> testmap;
+    cout << sizeof(testmap) << endl;
+    TestNode *temp;
+    temp = new TestNode("a");
+    cout << sizeof(*temp) << 2333 << endl;
+    test.push_back(*temp);
+    temp = new TestNode("bbb");
+    test.push_back(*temp);
+    testmap["b"] = temp;
+    cout << &test[0] << endl;
+    cout << &test[1] << endl;
+    cout << sizeof(test) << endl;
+    cout << sizeof("a") << endl;
+    map<int, int> m_i_test;
+    m_i_test[1] = 1;
+    map<string, string> m_s_test;
+    cout << sizeof(m_i_test) << endl;
+    cout << sizeof(m_s_test) << endl;
+
+    delete temp;
+    cout << "size: " << test.size() << endl;
+    float a = 1.0;
+    float b = 3.0;
+    vector<int> te;
+    te = {1, 2, 3, 4};
+    cout << te.back() << endl;
     SYSTEMTIME sys;
     GetLocalTime(&sys);
     printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
     cout << endl;
-    vector<int> test;
-    for (int i = 0; i < 200000; i ++) {
-        test.push_back(i);
-    }
     GetLocalTime(&sys);
     printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
     cout << endl;
+    */
     return 0;
 }
 
