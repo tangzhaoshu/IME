@@ -15,27 +15,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Bigram.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Entry.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="PYsegment.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="pyTrie.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="translate.cpp">
+    <ClCompile Include="pyToCH.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="translate.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
     <ClInclude Include="PCtable.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pyTrie.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Entry.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionGroup.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BigramUP.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TransTree.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PYsegment.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PySegNine.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="nineInput.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

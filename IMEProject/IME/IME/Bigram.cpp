@@ -4,9 +4,8 @@
 #include<string>
 #include<stack>
 #include<fstream>
-#include <cstdlib>
 #include<cmath>
-#include "Entry.cpp"
+#include "Entry.hpp"
 using namespace std;
 
 class CHNode {
@@ -32,7 +31,7 @@ public:
 
     void PrintLog() {
         ofstream fout ("log.txt", ofstream::app);
-		fout << ch << " 词条个数." << word_count << endl;
+        fout << ch << " 词条个数 " << word_count << endl;
         fout.close();
         for (auto ite = nextword.begin(); ite != nextword.end(); ite ++) {
             ite->second->PrintLog();
@@ -50,6 +49,7 @@ public:
     CHTree() {
         total = 0;
         root = new CHNode();
+		cout << sizeof(root->ch) << endl;
         entryTree = new CEntryTree();
         biGramTree();
         PrintLog();
@@ -57,7 +57,7 @@ public:
 
     void PrintLog() {
         ofstream fout ("log.txt", ofstream::app);
-        fout << "总词条个数：" << total << endl;
+        fout << "总词条个数 " << total << endl;
         stack<CHNode*> nodestack;
         CHNode* temp;
         nodestack.push(root);
@@ -65,7 +65,7 @@ public:
             temp = nodestack.top();
             nodestack.pop();
             if (temp->flag == 1) {
-                fout << temp->ch << "  次数： " << temp->word_count << "  概率： " <<
+                fout << temp->ch << "  次数  " << temp->word_count << "  概率 " <<
                 temp->word_prob << endl;
             }
             for (auto ite = temp->nextword.begin(); ite != temp->nextword.end(); ite ++) {
@@ -104,6 +104,21 @@ public:
         }
     }
 
+	bool judge(string str) {
+		for (int i = 3; i < str.size();) {
+			if (str.substr(0, i).size() == 3 || entryTree->Find(str.substr(0, i)) == 1) {
+				if (i == str.size()) {
+					return 1;
+				}
+				if (str.substr(i, str.size() - i).size() == 3 || entryTree->Find(str.substr(i, str.size() - i)) == 1) {
+					return 1;
+				}
+			}
+			i = i + 3;
+		}
+		return 0;
+	}
+
     void biGramTree() {
         fstream fin(datafile);
         if (!fin) {
@@ -112,11 +127,15 @@ public:
         }
         string str;
         while (getline(fin, str)) {
-            for (int i = 0; i < str.length(); i = i + 3) {
-                for (int j = i; j < str.length(); j = j + 3) {
-                        insert(str.substr(i, j - i + 3));
-                }
-            }
+			for (int i = 0; i < str.length(); i = i + 3) {
+				for (int j = i; j < str.length(); j = j + 3) {
+					if (str.substr(i, j - i + 3).size() == 3 || judge(str.substr(i, j - i + 3))) {
+						insert(str.substr(i, j - i + 3));
+					}
+					//insert(str.substr(i, j - i + 3));
+
+				}
+			}
         }
         fin.close();
 
@@ -139,6 +158,18 @@ public:
             }
         }
         return cur;
+    }
+    bool Find(string str){
+        CHNode *cur = root;
+        for (int i = 0; i < str.length(); i = i + 3) {
+            auto it = cur->nextword.find(str.substr(i, 3));
+            if (it != cur->nextword.end()) {
+                cur = cur->nextword[str.substr(i, 3)];
+            } else {
+                return 0;
+            }
+        }
+        return 1;
     }
 
 };

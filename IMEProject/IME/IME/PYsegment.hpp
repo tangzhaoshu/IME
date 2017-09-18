@@ -7,179 +7,229 @@
 #include <conio.h>
 #include <fstream>
 #include <windows.h>
-#include "pyTrie.cpp"
+#include "pyTrie.hpp"
 using namespace std;
 
 
 class CSegNode{
 public:
-    vector<string> mSegRes;
-    PYNode* mLastPoint;
-    int flag;
-    CSegNode() {
-        flag = 1; //1:切割合理，0：切割路径不合理；
-        mLastPoint = NULL;
-    }
+	vector<string> mSegRes;
+	PYNode* mLastPoint;
+	int flag;
+	CSegNode() {
+		flag = 1; //1:切割合理，0：切割路径不合理；
+		mLastPoint = NULL;
+	}
 
-    ~CSegNode() {
-        mLastPoint = NULL;
-    }
-    
+	~CSegNode() {
+		mLastPoint = NULL;
+		delete mLastPoint;
+	}
+
 };
 
 
 class CSegment{
 public:
-    vector<vector<CSegNode*>> step;
-    PYTree *pytree;
-    CSegment(set<string> py) {
-        pytree = new PYTree(py);
-    }
+	vector<vector<CSegNode*>> step;
+	PYTree *pytree;
+	CSegment() {
+		pytree = new PYTree();
+	}
 
-    void InputChar(string str) {
-        PYNode *cur = pytree->root;
-        PYNode *last;
-        vector<CSegNode*> segtemp;
-        CSegNode *segNodeTemp;
-        if (step.size() == 0) {
-            if (!cur->next[str[0] - 'a']) {
-                cout << "没有对应汉字" << endl;
-            } else {
-                segNodeTemp = new CSegNode();
-                last = cur->next[str[0] - 'a'];
-                segNodeTemp->mSegRes.push_back(str);
-                segNodeTemp->mLastPoint = last;
-            }
-            segtemp.push_back(segNodeTemp);
-            step.push_back(segtemp);
-        } else {
-            vector<CSegNode*> curSegment = step[step.size() - 1];
-            for (int i = 0; i < curSegment.size(); i ++) {
-                if (curSegment[i]->flag == 1) {
-                    if (!curSegment[i]->mLastPoint->next[str[0] - 'a']) {
-                        if (cur->next[str[0] - 'a']) {
-                            segNodeTemp = new CSegNode();
-                            last = cur->next[str[0] - 'a'];
-                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
-                            segNodeTemp->mSegRes.push_back(str);
-                            segNodeTemp->mLastPoint = last;
-                            segtemp.push_back(segNodeTemp);
-                        }
-                    } else {
-                        if(curSegment[i]->mLastPoint->next[str[0] - 'a']) {
-                            segNodeTemp = new CSegNode();
-                            last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
-                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
-                            string s = segNodeTemp->mSegRes.back();
-                            segNodeTemp->mSegRes.pop_back();
-                            segNodeTemp->mSegRes.push_back(s + str);
-                            segNodeTemp->mLastPoint = last;
-                            segtemp.push_back(segNodeTemp);
-                        }
-                        if (curSegment[i]->mLastPoint->flag == 1) {
-                            if (cur->next[str[0] - 'a']) {
-                                segNodeTemp = new CSegNode();
-                                last = cur->next[str[0] - 'a'];
-                                segNodeTemp->mSegRes = curSegment[i]->mSegRes;
-                                segNodeTemp->mSegRes.push_back(str);
-                                segNodeTemp->mLastPoint = last;
-                                if (last->flag == 0) {
-                                    segNodeTemp->flag = 0;
-                                }
-                                segtemp.push_back(segNodeTemp);
-                            }
-                            
-                        }
-                    }
-                } else {
-                    if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
-                        
-                        if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
-                            segNodeTemp = new CSegNode();
-                            last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
-                            segNodeTemp->mSegRes = curSegment[i]->mSegRes;
-                            string s = segNodeTemp->mSegRes.back();
-                            segNodeTemp->mSegRes.pop_back();
-                            segNodeTemp->mSegRes.push_back(s + str);
-                            segNodeTemp->mLastPoint = last;
-                            if (last->flag == 0) {
-                                segNodeTemp->flag = 0;
-                            }
-                            segtemp.push_back(segNodeTemp);
-                        }
-                        
-                    }
-                }
-                
-            }
-            step.push_back(segtemp);
-        }
-    }
+	~CSegment() {
+		delete pytree;
+	}
 
-    void DeleteChar() {
-        if (step.size() == 0) {
-            return;
-        }
-        vector<CSegNode*> curSegment = step[step.size() - 1];
-        for (int i = 0; i < curSegment.size(); i ++) {
-            delete curSegment[i];
-        }
-        step.pop_back();
-    }
-    
-    void output() {
-        if (step.size() == 0) {
-            cout << "Please input string" << endl;
-            return;
-        }
 
-        vector<CSegNode*> curSegment = step[step.size() - 1];
-        cout << "       segment result as follow:     " << endl;
-        for (int i = 0; i < curSegment.size(); i ++) {
-            if (curSegment[i]->flag == 1) {
-                for (int j = 0; j < curSegment[i]->mSegRes.size(); j ++) {
-                    cout << curSegment[i]->mSegRes[j] << " ";
-                }
-                cout << endl;
-            }
-        }
-    }
+	void AddStep(string str) {
+		PYNode *cur = pytree->root;
+		PYNode *last;
+		vector<CSegNode*> segtemp;
+		CSegNode *segNodeTemp;
+		if (step.size() == 0) {
+			if (!cur->next[str[0] - 'a']) {
+				cout << "input error" << endl;
+				return;
+			}
+			else {
+				segNodeTemp = new CSegNode();
+				last = cur->next[str[0] - 'a'];
+				segNodeTemp->mSegRes.push_back(str);
+				segNodeTemp->mLastPoint = last;
+			}
+			segtemp.push_back(segNodeTemp);
+			step.push_back(segtemp);
+		}
+		else {
+			vector<CSegNode*> curSegment = step[step.size() - 1];
+			for (int i = 0; i < curSegment.size(); i++) {
+				if (curSegment[i]->flag == 1) {
+					if (!curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+						if (cur->next[str[0] - 'a']) {
+							segNodeTemp = new CSegNode();
+							last = cur->next[str[0] - 'a'];
+							segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+							segNodeTemp->mSegRes.push_back(str);
+							segNodeTemp->mLastPoint = last;
+							segtemp.push_back(segNodeTemp);
+						}
+					}
+					else {
+						if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+							segNodeTemp = new CSegNode();
+							last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
+							segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+							string s = segNodeTemp->mSegRes.back();
+							segNodeTemp->mSegRes.pop_back();
+							segNodeTemp->mSegRes.push_back(s + str);
+							segNodeTemp->mLastPoint = last;
+							segtemp.push_back(segNodeTemp);
+						}
+						if (curSegment[i]->mLastPoint->flag == 1) {
+							if (cur->next[str[0] - 'a']) {
+								segNodeTemp = new CSegNode();
+								last = cur->next[str[0] - 'a'];
+								segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+								segNodeTemp->mSegRes.push_back(str);
+								segNodeTemp->mLastPoint = last;
+								if (last->flag == 0) {
+									segNodeTemp->flag = 0;
+								}
+								segtemp.push_back(segNodeTemp);
+							}
 
-    vector<vector<string>> GetSegment() {
-        vector<vector<string>> result;
-        if (step.size() == 0) {
-            cout << "Please input string" << endl;
-            return result;
-        }
-        vector<string> temp;
-        vector<CSegNode*> curSegment = step[step.size() - 1];
-        for (int i = 0; i < curSegment.size(); i ++) {
-            if (curSegment[i]->flag == 1) {
-                for (int j = 0; j < curSegment[i]->mSegRes.size(); j ++) {
-                    temp.push_back(curSegment[i]->mSegRes[j]);
-                }
-                result.push_back(temp);
-                temp.clear();
-            }
-        }
-        return result;
-    }
+						}
+					}
+				}
+				else {
+					if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
 
-    void Log() {
-        vector<vector<string>> result = GetSegment();
-        ofstream fout("log.txt", ofstream::app);
-        fout << "---------------------音节切分-------------------------" << endl;
-        for (int i = 0; i < result.size(); i ++) {
-            fout << "切分线路" << i << ": ";
-            for (int j = 0; j < result[i].size(); j ++) {
-                fout << result[i][j] << "'";
-            }
-            fout << endl;
-        }
-        fout << "---------------------音节切分-------------------------" << endl;
-        fout << endl;
-        fout.close();
-    }
+						if (curSegment[i]->mLastPoint->next[str[0] - 'a']) {
+							segNodeTemp = new CSegNode();
+							last = curSegment[i]->mLastPoint->next[str[0] - 'a'];
+							segNodeTemp->mSegRes = curSegment[i]->mSegRes;
+							string s = segNodeTemp->mSegRes.back();
+							segNodeTemp->mSegRes.pop_back();
+							segNodeTemp->mSegRes.push_back(s + str);
+							segNodeTemp->mLastPoint = last;
+							if (last->flag == 0) {
+								segNodeTemp->flag = 0;
+							}
+							segtemp.push_back(segNodeTemp);
+						}
+
+					}
+				}
+
+			}
+			step.push_back(segtemp);
+		}
+	}
+
+	void DeleteStep() {
+		if (step.size() == 0) {
+			return;
+		}
+		vector<CSegNode*> curSegment = step[step.size() - 1];
+		for (int i = 0; i < curSegment.size(); i++) {
+			delete curSegment[i];
+		}
+		step.pop_back();
+	}
+
+	vector<string> getpy(string str) {
+		return pytree->getpy(str);
+	}
+
+	void clear() {
+		if (step.size() == 0) {
+			return;
+		}
+		while (step.size() != 0) {
+			DeleteStep();
+		}
+	}
+
+	void output() {
+		if (step.size() == 0) {
+			cout << "Please input string" << endl;
+			return;
+		}
+
+		vector<CSegNode*> curSegment = step[step.size() - 1];
+		cout << "       segment result as follow:     " << endl;
+		for (int i = 0; i < curSegment.size(); i++) {
+			if (curSegment[i]->flag == 1) {
+				for (int j = 0; j < curSegment[i]->mSegRes.size(); j++) {
+					cout << curSegment[i]->mSegRes[j] << " ";
+				}
+				cout << endl;
+			}
+		}
+	}
+
+	vector<vector<string>> GetSegment() {
+		vector<vector<string>> result;
+		if (step.size() == 0) {
+			cout << "Please input string" << endl;
+			return result;
+		}
+		vector<string> temp;
+		vector<CSegNode*> curSegment = step[step.size() - 1];
+		for (int i = 0; i < curSegment.size(); i++) {
+			if (curSegment[i]->flag == 1) {
+				for (int j = 0; j < curSegment[i]->mSegRes.size(); j++) {
+					temp.push_back(curSegment[i]->mSegRes[j]);
+				}
+				result.push_back(temp);
+				temp.clear();
+			}
+		}
+		return result;
+	}
+
+	map<char*, char*> GetNewResult() {
+		vector<vector<string>> vecSegment = GetSegment();
+		map<char*, char*> result;
+		char* history;
+		char* newInput;
+		string str = "";
+		for (int i = 0; i < vecSegment.size(); i++) {
+			str = "";
+			for (int j = 0; j < vecSegment[i].size() - 1; j++) {
+				str = str + vecSegment[i][j];
+			}
+			if (str == "") {
+				history = NULL;
+			}
+			else{
+				history = new char[str.length() + 1];
+				strcpy_s(history, str.length() + 1, str.c_str());
+			}
+			str = vecSegment[i][vecSegment[i].size() - 1];
+			newInput = new char[str.length() + 1];
+			strcpy_s(newInput, str.length() + 1, str.c_str());
+			result[history] = newInput;
+		}
+		return result;
+	}
+
+	void Log() {
+		vector<vector<string>> result = GetSegment();
+		ofstream fout("logNew.txt", ofstream::app);
+		fout << "---------------------音节切分-------------------------" << endl;
+		for (int i = 0; i < result.size(); i++) {
+			fout << "切分线路" << i << ": ";
+			for (int j = 0; j < result[i].size(); j++) {
+				fout << result[i][j] << "'";
+			}
+			fout << endl;
+		}
+		fout << "---------------------音节切分-------------------------" << endl;
+		fout << endl;
+		fout.close();
+	}
 
 
 };

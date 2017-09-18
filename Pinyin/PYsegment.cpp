@@ -23,6 +23,7 @@ public:
 
     ~CSegNode() {
         mLastPoint = NULL;
+		delete mLastPoint;
     }
     
 };
@@ -32,11 +33,16 @@ class CSegment{
 public:
     vector<vector<CSegNode*>> step;
     PYTree *pytree;
-    CSegment(set<string> py) {
-        pytree = new PYTree(py);
+    CSegment() {
+        pytree = new PYTree();
     }
 
-    void InputChar(string str) {
+    ~CSegment() {
+		delete pytree;
+    }
+    
+
+    void AddStep(string str) {
         PYNode *cur = pytree->root;
         PYNode *last;
         vector<CSegNode*> segtemp;
@@ -117,7 +123,7 @@ public:
         }
     }
 
-    void DeleteChar() {
+    void DeleteStep() {
         if (step.size() == 0) {
             return;
         }
@@ -128,12 +134,16 @@ public:
         step.pop_back();
     }
 
+    vector<string> getpy(string str) {
+		return pytree->getpy(str);
+	}
+
     void clear() {
         if (step.size() == 0) {
             return;
         }
         while (step.size() != 0) {
-            DeleteChar();
+            DeleteStep();
         }
     }
     
@@ -175,9 +185,35 @@ public:
         return result;
     }
 
+    map<char*, char*> GetNewResult() {
+		vector<vector<string>> vecSegment = GetSegment();
+		map<char*, char*> result;
+		char* history;
+		char* newInput;
+		string str = "";
+		for (int i = 0; i < vecSegment.size(); i++) {
+            str = "";
+			for (int j = 0; j < vecSegment[i].size() - 1; j++) {
+				str = str + vecSegment[i][j];
+			}
+			if (str == "") {
+				history = NULL;
+			}
+			else{
+				history = new char[str.length() + 1];
+				strcpy_s(history, str.length() + 1, str.c_str());
+			}
+			str = vecSegment[i][vecSegment[i].size() - 1];
+			newInput = new char[str.length() + 1];
+			strcpy_s(newInput, str.length() + 1, str.c_str());
+			result[history] = newInput;
+		}
+		return result;
+	}
+
     void Log() {
         vector<vector<string>> result = GetSegment();
-        ofstream fout("log.txt", ofstream::app);
+        ofstream fout("logNew.txt", ofstream::app);
         fout << "---------------------音节切分-------------------------" << endl;
         for (int i = 0; i < result.size(); i ++) {
             fout << "切分线路" << i << ": ";

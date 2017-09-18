@@ -136,7 +136,7 @@ int main() {
         py.insert(ite->first);
     }
 
-    CSegment *segment = new CSegment(py);
+    CSegment *segment = new CSegment();
     TranslateTree *trans = new TranslateTree();
 
     vector<vector<string>> segResult;

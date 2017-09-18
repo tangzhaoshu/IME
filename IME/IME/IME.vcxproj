@@ -79,7 +79,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bigram.cpp" />
-    <ClCompile Include="BigramUP.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="nineInput.cpp" />
     <ClCompile Include="PYsegment.cpp" />
@@ -87,10 +86,13 @@
     <ClCompile Include="pyToCH.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigramUP.hpp" />
     <ClInclude Include="Entry.hpp" />
+    <ClInclude Include="FunctionGroup.hpp" />
     <ClInclude Include="PCtable.hpp" />
     <ClInclude Include="pyTrie.hpp" />
     <ClInclude Include="translate.hpp" />
+    <ClInclude Include="TransTree.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

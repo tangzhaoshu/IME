@@ -32,8 +32,8 @@ class CSegment{
 public:
     vector<vector<CSegNode*>> step;
     PYTree *pytree;
-    CSegment(set<string> py) {
-        pytree = new PYTree(py);
+    CSegment() {
+        pytree = new PYTree();
     }
 
 	vector<string> getpy(string str) {

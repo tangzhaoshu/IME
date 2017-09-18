@@ -94,11 +94,36 @@ string UTF8ToGBK(const string& strUTF8)
     return strTemp;
 }
 
+class CCharNode {
+public:
+    char* x;
+    CCharNode() {
+        x = new char[2];
+        x[0] = 'a';
+        x[1] = '\0';
+    }
+    ~CCharNode() {
+        delete[] x;
+    }
+};
+
+vector<char*> GetChar() {
+    CCharNode* p = new CCharNode();
+    vector<char*>  res;
+    res.push_back(p->x);
+    delete p;
+    return res;
+}
 
  
 int main()
 {   
-    fstream fin("testdata.txt");
+    vector<char*> y;
+    y = GetChar();
+    cout << y.size() << endl;
+    cout << y[0] << endl;;
+
+    fstream fin("result.txt");
     if (!fin) {
         cout << "open file error" << endl;
         exit(1);
@@ -106,6 +131,9 @@ int main()
     vector<string> result;
     string str;
     getline(fin, str);
+    getline(fin, str);
+    cout << str.length() << endl;
+    cout << str.substr(3, 3) << endl;
     const char* cstr = str.c_str();
     cout << cstr << endl;
     cout << strlen(cstr) << endl;

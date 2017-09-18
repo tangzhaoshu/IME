@@ -13,27 +13,11 @@
 #include "PCtable.hpp"
 //#include "PYsegment.cpp"
 #include "PYSegNine.cpp"
-#include "translate.hpp"
+//#include "translate.hpp"
+#include "BigramUP.hpp"
 using namespace std;
 
 
-string UTF8ToGBK(const string& strUTF8)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
-    unsigned short *wszGBK = new unsigned short[len + 1];
-    memset(wszGBK, 0, len * 2 + 2);
-    MultiByteToWideChar(CP_UTF8, 0, (LPCCH)strUTF8.c_str(), -1, (LPWSTR)wszGBK, len);
-
-    len = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)wszGBK, -1, NULL, 0, NULL, NULL);
-    char *szGBK = new char[len + 1];
-    memset(szGBK, 0, len + 1);
-    WideCharToMultiByte(CP_ACP,0, (LPWSTR)wszGBK, -1, szGBK, len, NULL, NULL);
-    //strUTF8 = szGBK;
-    std::string strTemp(szGBK);
-    delete[]szGBK;
-    delete[]wszGBK;
-    return strTemp;
-}
 
 
 
@@ -44,134 +28,145 @@ int cmpYJNode(const pair<string, double> &x, const pair<string, double> &y) {
 
 
 int main() {
-	cout << "hello" << endl;
-    ofstream fout("log.txt");
-    fout << "start process" << endl;
-    fout.close();
+	
+	char* cstr = new char[1];
+	cstr[0] = '\0';
+	char* cstr1 = new char[3];
+	cstr1[1] = '1';
+	cstr1[2] = '2';
+	cstr1[3] = '\0';
+	char* cstr2 = MergeStr(cstr, cstr1);
+	cout << cstr2 << endl;
+	return 0;
 
-    CHPYTable *cptable = new CHPYTable();
-    //CSegment *segment = new CSegment(cptable->py);
-	CStepInput *segment = new CStepInput(cptable->py);
+	//cout << "hello" << endl;
+ //   ofstream fout("log.txt");
+ //   fout << "start process" << endl;
+ //   fout.close();
 
-    TranslateTree *trans = new TranslateTree();
+ //   CHPYTable *cptable = new CHPYTable();
+ //   //CSegment *segment = new CSegment(cptable->py);
+	//CStepInput *segment = new CStepInput(cptable->py);
 
-    vector<vector<string>> segResult;
-    vector<vector<string>> candidateCH;
-    vector<string> temp;
-    vector<YJNode*> translateResult;
-    vector<pair<string, double>> output;
-    vector<vector<pair<string, double>>> step;
+ //   TranslateTree *trans = new TranslateTree();
 
-    string input;
-    cout << "input pinyin" << endl;
-    char ch;
-    string s;
-    while (1){
-        
-		while (ch = _getch()){
-			s = "";
-			if (27 == ch) {
-				return 0;
-			}
-			else if (8 == ch) {
-				if (input.size() > 0) {
-					input = input.substr(0, input.size() - 1);
-					trans->DeleteYJ(segment->GetSegment());
-					segment->DeleteStep();
-					system("cls");
-					cout << input << endl;
-					segment->output();
-					step.pop_back();
-					if (step.size() > 0) {
-						for (int i = 0; i < step.back().size(); i++) {
-							cout << UTF8ToGBK(step.back()[i].first) << endl;
-						}
-					}
-					segment->Log();
-					trans->ShowTreePath();
-				}
-				else {
-					input = "";
-					system("cls");
-				}
-			}
-			else if ((ch >= 'a' && ch <= 'z') || (ch > '1' && ch <= '9')) {
-				s += ch;
-				input += ch;
-				system("cls");
-				cout << input << endl;
+ //   vector<vector<string>> segResult;
+ //   vector<vector<string>> candidateCH;
+ //   vector<string> temp;
+ //   vector<YJNode*> translateResult;
+ //   vector<pair<string, double>> output;
+ //   vector<vector<pair<string, double>>> step;
 
-				candidateCH.clear();
-				output.clear();
+ //   string input;
+ //   cout << "input pinyin" << endl;
+ //   char ch;
+ //   string s;
+ //   while (1){
+ //       
+	//	while (ch = _getch()){
+	//		s = "";
+	//		if (27 == ch) {
+	//			return 0;
+	//		}
+	//		else if (8 == ch) {
+	//			if (input.size() > 0) {
+	//				input = input.substr(0, input.size() - 1);
+	//				trans->DeleteYJ(segment->GetSegment());
+	//				segment->DeleteStep();
+	//				system("cls");
+	//				cout << input << endl;
+	//				segment->output();
+	//				step.pop_back();
+	//				if (step.size() > 0) {
+	//					for (int i = 0; i < step.back().size(); i++) {
+	//						cout << UTF8ToGBK(step.back()[i].first) << endl;
+	//					}
+	//				}
+	//				segment->Log();
+	//				trans->ShowTreePath();
+	//			}
+	//			else {
+	//				input = "";
+	//				system("cls");
+	//			}
+	//		}
+	//		else if ((ch >= 'a' && ch <= 'z') || (ch > '1' && ch <= '9')) {
+	//			s += ch;
+	//			input += ch;
+	//			system("cls");
+	//			cout << input << endl;
 
-				SYSTEMTIME sys;
-				GetLocalTime(&sys);
-				printf("%4d/%02d/%02d %02d:%02d:%02d.%03d", sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
-				cout << endl;
+	//			candidateCH.clear();
+	//			output.clear();
 
-				segment->AddStep(s);
+	//			SYSTEMTIME sys;
+	//			GetLocalTime(&sys);
+	//			printf("%4d/%02d/%02d %02d:%02d:%02d.%03d", sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
+	//			cout << endl;
 
-				segResult = segment->GetSegment();
+	//			segment->AddStep(s);
 
-
-
-				for (int i = 0; i < segResult.size(); i++) {
-					temp = segment->getpy(segResult[i].back());
-					temp = cptable->getChinese(temp);
-					candidateCH.push_back(temp);
-				}
+	//			segResult = segment->GetSegment();
 
 
 
-				translateResult = trans->getTranslate(segResult, candidateCH);
+	//			for (int i = 0; i < segResult.size(); i++) {
+	//				temp = segment->getpy(segResult[i].back());
+	//				temp = cptable->getChinese(temp);
+	//				candidateCH.push_back(temp);
+	//			}
 
-				GetLocalTime(&sys);
-				printf("%4d/%02d/%02d %02d:%02d:%02d.%03d", sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
-				cout << endl;
-				cout << endl;
 
-				trans->ShowTreePath();
-				//     segment->output();
-				segment->Log();
 
-				int flag = 0;
-				for (int i = 0; i < translateResult.size(); i++) {
-					translateResult[i]->print();
-					for (int j = 0; j < translateResult[i]->trans_Total.size(); j++) {
-						if (translateResult[i]->trans_Total[j]->minSeg == 0) {
-							continue;
-						}
-						if (translateResult[i]->trans_Total[j]->minSeg == 1) {
-							output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
-								translateResult[i]->trans_Total[j]->prob));
-							flag = 2;
-						}
-						else {
-							if (flag == 0) {
-								output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
-									translateResult[i]->trans_Total[j]->prob));
-								flag = 1;
-							}
-							else if (flag == 1 && j == 0) {
-								if (translateResult[i]->trans_Total[j]->prob < output.back().second) {
-									output.pop_back();
-									output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
-										translateResult[i]->trans_Total[j]->prob));
-								}
-							}
-						}
-					}
-				}
-				sort(output.begin(), output.end(), cmpYJNode);
-				for (int i = 0; i < output.size(); i++) {
-					cout << UTF8ToGBK(output[i].first) << endl;
-				}
-				cout << endl;
-				step.push_back(output);
-			}
+	//			translateResult = trans->getTranslate(segResult, candidateCH);
 
-		}
+	//			GetLocalTime(&sys);
+	//			printf("%4d/%02d/%02d %02d:%02d:%02d.%03d", sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond, sys.wMilliseconds);
+	//			cout << endl;
+	//			cout << endl;
 
-    }
-    return 0;
+	//			trans->ShowTreePath();
+	//			//     segment->output();
+	//			segment->Log();
+
+	//			int flag = 0;
+	//			for (int i = 0; i < translateResult.size(); i++) {
+	//				translateResult[i]->print();
+	//				for (int j = 0; j < translateResult[i]->trans_Total.size(); j++) {
+	//					if (translateResult[i]->trans_Total[j]->minSeg == 0) {
+	//						continue;
+	//					}
+	//					if (translateResult[i]->trans_Total[j]->minSeg == 1) {
+	//						output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
+	//							translateResult[i]->trans_Total[j]->prob));
+	//						flag = 2;
+	//					}
+	//					else {
+	//						if (flag == 0) {
+	//							output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
+	//								translateResult[i]->trans_Total[j]->prob));
+	//							flag = 1;
+	//						}
+	//						else if (flag == 1 && j == 0) {
+	//							if (translateResult[i]->trans_Total[j]->prob < output.back().second) {
+	//								output.pop_back();
+	//								output.push_back(make_pair(translateResult[i]->trans_Total[j]->trans_res,
+	//									translateResult[i]->trans_Total[j]->prob));
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//			sort(output.begin(), output.end(), cmpYJNode);
+	//			for (int i = 0; i < output.size(); i++) {
+	//				cout << UTF8ToGBK(output[i].first) << endl;
+	//			}
+	//			cout << endl;
+	//			step.push_back(output);
+	//		}
+
+	//	}
+
+ //   }
+ //   return 0;
 }

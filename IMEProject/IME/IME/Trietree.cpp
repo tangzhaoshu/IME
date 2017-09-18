@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "Pctable.hpp"
+#include "Pctable.cpp"
 using namespace std;
 
 class Node {

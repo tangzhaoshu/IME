@@ -20,17 +20,23 @@ public:
             next[i] = NULL;
         }
     }
+
+    ~PYNode() {
+		for (int i = 0; i < 26; i++) {
+			delete next[i];
+		}
+	}
 };
 
 class PYTree{
 public:
     PYNode* root;
-    PYtree() {
+    PYTree() {
         root = new PYNode();
+        creat();
     }
-    PYTree(set<string> py) {
-        root = new PYNode();
-        creat(py);
+    ~PYTree(){
+		delete root;
     }
 
     
@@ -60,10 +66,23 @@ public:
         return 1;
     }
 
-    void creat(set<string> pygroup) {
-        for (auto it = pygroup.begin(); it != pygroup.end(); it ++) {
-            insert(*it);
+    void creat() {
+        fstream fin("pysource.txt");
+        if (!fin) {
+            cout << "open file error" << endl;
+            exit(1);
         }
+        string str;
+        int index = 0;
+        while(getline(fin, str)) {
+            if (index == 0) {
+                insert(str);
+                index ++;
+            } else if (index == 1) {
+                index --;
+            }
+        }
+        fin.close();   
     }
 
     vector<string> getpy(string str) {

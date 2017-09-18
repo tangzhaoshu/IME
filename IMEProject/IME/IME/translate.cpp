@@ -15,23 +15,23 @@
 #include "Bigram.cpp"
 using namespace std;
 
-string UTF8ToGBK(const string& strUTF8)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
-    unsigned short *wszGBK = new unsigned short[len + 1];
-    memset(wszGBK, 0, len * 2 + 2);
-    MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, (LPWSTR)wszGBK, len);
-
-    len = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)wszGBK, -1, NULL, 0, NULL, NULL);
-    char *szGBK = new char[len + 1];
-    memset(szGBK, 0, len + 1);
-    WideCharToMultiByte(CP_ACP,0, (LPWSTR)wszGBK, -1, szGBK, len, NULL, NULL);
-    //strUTF8 = szGBK;
-    std::string strTemp(szGBK);
-    delete[]szGBK;
-    delete[]wszGBK;
-    return strTemp;
-}
+//string UTF8ToGBK1(const string& strUTF8)
+//{
+//    int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);
+//    unsigned short *wszGBK = new unsigned short[len + 1];
+//    memset(wszGBK, 0, len * 2 + 2);
+//    MultiByteToWideChar(CP_UTF8, 0, (LPCCH)strUTF8.c_str(), -1, (LPWSTR)wszGBK, len);
+//
+//    len = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)wszGBK, -1, NULL, 0, NULL, NULL);
+//    char *szGBK = new char[len + 1];
+//    memset(szGBK, 0, len + 1);
+//    WideCharToMultiByte(CP_ACP,0, (LPWSTR)wszGBK, -1, szGBK, len, NULL, NULL);
+//    //strUTF8 = szGBK;
+//    std::string strTemp(szGBK);
+//    delete[]szGBK;
+//    delete[]wszGBK;
+//    return strTemp;
+//}
 
 class Path {
 public:
@@ -93,7 +93,7 @@ public:
     }
 };
 
-int compPath(const Path *x, const Path *y) {
+int cmpPath(const Path *x, const Path *y) {
     if (x->gram + x->joint + 1 < y->gram + y->joint) {
         return 1;
     } else if (x->gram + x->joint > y->gram + y->joint + 1) {
@@ -130,7 +130,7 @@ public:
             prob = 0;
             return;
         }
-        sort(path_total.begin(), path_total.end(), compPath);
+        sort(path_total.begin(), path_total.end(), cmpPath);
         int i = 0;
         while (i < path_total.size() && path_total[i]->flag == 0) {
             i ++;
@@ -206,23 +206,23 @@ public:
 
     void printlog() {
         ofstream fout ("log.txt", ofstream::app);
-        fout << "汉字." << trans_res << " Prob." << prob << " 最小词条个数." << minSeg << endl;
-        fout << "路径." << endl;
+        fout << "汉字:" << trans_res << " Prob: " << prob << " 最小词条个数: " << minSeg << endl;
+        fout << "路径:" << endl;
         for (int i = 0; i < path_total.size(); i ++) {
             if (path_total[i]->flag == 1) {
-                fout << "有效路径.";
+                fout << "有效路径: ";
                 for (int j = 0; j < path_total[i]->_path.size(); j ++) {
                     fout << path_total[i]->_path[j] << " ";
                 }
                 fout << " Prob: " << path_total[i]->_prob << ";  ";
-                fout << " Ngram次数 ." << path_total[i]->gram << " 拼接次数 ." << path_total[i]->joint << endl;
+                fout << " Ngram次数:" << path_total[i]->gram << " 拼接次数: " << path_total[i]->joint << endl;
             } else {
-                fout << "无效路径. ";
+                fout << "无效路径: ";
                 for (int j = 0; j < path_total[i]->_path.size(); j ++) {
                     fout << path_total[i]->_path[j] << " ";
                 }
-                fout << " Prob. " << path_total[i]->_prob << ";  ";
-                fout << " Ngram次数. " << path_total[i]->gram << " 拼接次数. " << path_total[i]->joint << endl;
+                fout << " Prob: " << path_total[i]->_prob << ";  ";
+                fout << " Ngram次数:" << path_total[i]->gram << " 拼接次数: " << path_total[i]->joint << endl;
             }
         }
         fout << endl;
@@ -237,7 +237,7 @@ public:
 };
 
 
-int comp(const TransNode *x, const TransNode *y) {
+int cmp(const TransNode *x, const TransNode *y) {
  //   if (x->minSeg == 0) {
  //       return 0;
  //   }
@@ -325,7 +325,7 @@ public:
                     if (temp->flag == 1 && t->path_total[index]->last == temp->last) {
            //             cout << UTF8ToGBK1(t->path_total[index]->last->ch) << " "
             //            << UTF8ToGBK1(trans_Total[i]->trans_res) << 3 << endl;
-                        if (compPath(t->path_total[index], trans_Total[i]->path_total[j])) {
+                        if (cmpPath(t->path_total[index], trans_Total[i]->path_total[j])) {
                             if (trans_Total[i]->path_total.size() == 1) {
                                 deleteTrans(trans_Total[i]);
                             } else {
@@ -382,7 +382,7 @@ public:
 
     void Filter() {
         int limit = 3000;
-        sort(trans_Total.begin(), trans_Total.end(), comp);
+        sort(trans_Total.begin(), trans_Total.end(), cmp);
         int size = trans_Total.size();
         int index = 1;
         for (auto ite = trans_Total.begin(); ite != trans_Total.end(); ite ++) {
@@ -454,21 +454,78 @@ public:
                         auto cur_ch = chtemp->nextword.find(ch[i]);
                         if (cur_ch != chtemp->nextword.end()) {
 
-  //                          cout << 1 << UTF8ToGBK1(cur_ch->second->ch) << endl;
+                //            cout << 1 << UTF8ToGBK1(cur_ch->second->ch) << endl;
 
                             if (cur_ch->second->flag == 1) {
                                 path = new Path((*tr)->path_total[j]);
-                                path->popAndPush(cur_ch->second->ch);
-                                path->set((*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
-                                    - chtemp->word_prob, cur_ch->second);
+                                path->_path.pop_back();
+                                double p = 0.0;
+                                double p2, p1;
+                                if (path->_path.size() > 0) {
+                                    if (chtree->Find(path->_path.back() + chtemp->ch)) {
+                                        p1 = chtree->match(path->_path.back() + chtemp->ch)->trans_prob;
+                                        if (chtree->Find(path->_path.back() + cur_ch->second->ch)) {
+                                            CHNode *c = chtree->match(path->_path.back() + cur_ch->second->ch);
+                                            p2 = log(c->gram_count / chtree->match(path->_path.back())->gram_count) * (-1);
+                                        } else {
+                                            p2 = cur_ch->second->word_prob;
+                                            path->gram --;
+                                            path->joint ++;
+                                        }
+                                    }
+                                } else {
+                                    p1 = chtemp->word_prob;
+                                    p2 = cur_ch->second->word_prob;
+                                }
+                                p = p + p2 - p1;
+                                path->_path.push_back(cur_ch->second->ch);
+                            //    
+                           //     double p1 = (*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
+                           //     - chtemp->word_prob;
+                           //     double p = 0.0;
+                           //     if (path->_path.size() > 0) {
+                           //         CHNode *c = chtree->match(path->_path.back() + cur_ch->second->ch);
+                           //         double p2 = log(c->gram_count / chtree->match(path->_path.back())->gram_count) * (-1);
+                           //         if (p2 < p1) {
+                            //           p1 = p2;
+                             //      }
+                            //    }
+                            //    
+                        //        path->popAndPush(cur_ch->second->ch);
+                                path->set((*tr)->path_total[j]->_prob + p, cur_ch->second);
                                 path->setstate(0, 1);
                                 trans->insertPath(path);
                             } else {
                                 if (chtree->entryTree->Find(cur_ch->second->ch) != 2) {
                                     path = new Path((*tr)->path_total[j]);
-                                    path->popAndPush(cur_ch->second->ch);
-                                    path->set((*tr)->path_total[j]->_prob + cur_ch->second->word_prob 
-                                    - chtemp->word_prob, cur_ch->second);
+                                    path->_path.pop_back();
+                                    double p = 0.0;
+                                    double p2 = 0.0;
+                                    double p1 = 0.0;
+                                    if (path->_path.size() > 0) {
+                                        
+                                        if (chtree->Find(path->_path.back() + chtemp->ch)) {
+                                            p1 = chtree->match(path->_path.back() + chtemp->ch)->trans_prob;
+                                            if (chtree->Find(path->_path.back() + cur_ch->second->ch)) {
+                                                CHNode *c = chtree->match(path->_path.back() + cur_ch->second->ch);
+                                                p2 = log(c->gram_count / chtree->match(path->_path.back())->gram_count) * (-1);
+                                                if (p2 < 0) {
+                                                    cout << UTF8ToGBK1(path->_path.back()) << endl;
+                                                }
+                                            } else {
+                                                p2 = cur_ch->second->word_prob;
+                                                path->gram --;
+                                                path->joint ++;
+                                            }
+                                        }
+                                    } else {
+                                        p1 = chtemp->word_prob;
+                                        p2 = cur_ch->second->word_prob;
+                                    }
+                                    p = p + p2 - p1;
+                                    
+                                    path->_path.push_back(cur_ch->second->ch);
+                                    path->set((*tr)->path_total[j]->_prob + p, cur_ch->second);
                                     path->setstate(0, 0);
                                     trans->insertPath(path);
                                 }
@@ -482,7 +539,6 @@ public:
                                 trans->insertPath(path);
                                 optFlag == 0;
                             }
-                            
                         } else {
                             if (optFlag == 0) {
                                 continue;
@@ -494,7 +550,7 @@ public:
                                     path->push(ch[i]);
                                     path->set((*tr)->path_total[j]->_prob + chtemp->word_prob, chtemp);
                                     path->addJoint();
-                                    path->setstate(1, 1);
+                                    path->setstate(0, 1);
                                     trans->insertPath(path);
                                     optFlag = 0;
                                 }
@@ -525,30 +581,82 @@ public:
    //     SYSTEMTIME sys;
     //    GetLocalTime(&sys);
     //    printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
-        cout << endl;
         yjtemp->Filter();
         yjtemp->yinjie = str;
         cur->next[str] = yjtemp;
     }
 
-
+    void FilterTranslate(vector<YJNode*> total) {
+        if (total.size() == 0) {
+            return;
+        }
+        vector<vector<TransNode*>::iterator> ite;
+        int limit = 3000;
+        for (int i = 0; i < total.size(); i ++) {
+            ite.push_back(total[i]->trans_Total.begin());
+        }
+        int pos;
+        for (int i = 0; i < limit; i ++) {
+            pos = -1;
+            for (int j = 0; j < ite.size(); j ++) {
+                if (ite[j] == total[j]->trans_Total.end()) {
+                    continue;
+                }
+                if (pos == -1) {
+                    pos = j;
+                } else {
+                    if (cmp(*(ite[pos]), *(ite[j])) == 0) {
+                        pos = j;
+                    }
+                }
+            }
+            if(pos == -1) {
+                break;
+            }
+            i += (*ite[pos])->path_total.size() - 1;
+            ite[pos] ++;
+        }
+        for (int i = 0; i < total.size(); i ++) {
+            total[i]->trans_Total.erase(ite[i], total[i]->trans_Total.end());
+        }
+    }
 
     vector<YJNode*> getTranslate(vector<vector<string>> pyseg, vector<vector<string>> candCH) {
         vector<YJNode*> result;
         YJNode *cur;
         for (int i = 0; i < pyseg.size(); i ++) {
             cur = head;
-            for (int j = 0; j < pyseg[i].size(); j ++) {
+            for (int j = 0; j < pyseg[i].size() - 1; j ++) {
                 auto ite = cur->next.find(pyseg[i][j]);
                 if (ite != cur->next.end()) {
                     cur = cur->next[pyseg[i][j]];
                 } else {
-                    insert(cur, candCH[i], pyseg[i][j]);
-                    cur = cur->next[pyseg[i][j]];
+                    break;
+           //         insert(cur, candCH[i], pyseg[i][j]);
+             //       cur = cur->next[pyseg[i][j]];
                 }
+            }
+            auto ite = cur->next.find(pyseg[i].back());
+            if (ite != cur->next.end()) {
+                cur = cur->next[pyseg[i].back()];
+            } else {
+                insert(cur, candCH[i], pyseg[i].back());
+                cur = cur->next[pyseg[i].back()];
             }
             result.push_back(cur);
         }
+        
+        SYSTEMTIME sys;
+        GetLocalTime(&sys);
+        printf("%4d/%02d/%02d %02d:%02d:%02d.%03d",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute,sys.wSecond,sys.wMilliseconds);
+        cout << endl;
+
+        FilterTranslate(result);
+        int sum = 0;
+        for (int i = 0; i < result.size(); i ++) {
+            sum += result[i]->trans_Total.size();
+        }
+        cout << sum << endl;
         return result;
     }
 

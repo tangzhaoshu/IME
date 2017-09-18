@@ -13,7 +13,6 @@ public:
     int flag;       //0：非全拼，1：全拼
     string pinyin;
     PYNode *next[26];
-    map<string, int> value;
     PYNode() {
         flag = 0;
         pinyin = "";
@@ -21,6 +20,11 @@ public:
             next[i] = NULL;
         }
     }
+	~PYNode() {
+		for (int i = 0; i < 26; i++) {
+			delete next[i];
+		}
+	}
 };
 
 class PYTree{
@@ -28,11 +32,19 @@ public:
     PYNode* root;
     PYTree() {
         root = new PYNode();
+		creat();
     }
     PYTree(set<string> py) {
         root = new PYNode();
-        creat(py);
+        creat();
     }
+
+	~PYTree(){
+		delete root;
+	}
+
+
+
     void insert(string str) {
         PYNode* cur = root;
         for (int i = 0; i < str.size(); i ++) {
@@ -58,11 +70,25 @@ public:
         return 1;
     }
 
-    void creat(set<string> pygroup) {
-        for (auto it = pygroup.begin(); it != pygroup.end(); it ++) {
-            insert(*it);
-        }
-    }
+	void creat() {
+		fstream fin("pysource.txt");
+		if (!fin) {
+			cout << "open file error" << endl;
+			exit(1);
+		}
+		string str;
+		int index = 0;
+		while (getline(fin, str)) {
+			if (index == 0) {
+				insert(str);
+				index++;
+			}
+			else if (index == 1) {
+				index--;
+			}
+		}
+		fin.close();
+	}
 
     vector<string> getpy(string str) {
         PYNode* cur = root;
@@ -199,7 +225,7 @@ public:
             }
         }
         ofstream fout("log.txt", ofstream::app);
-		fout << str << "音节切分如下." << endl;
+        fout << str << "音节切分如下:" << endl;
         for (int i = 0; i < seg.size(); i ++) {
             fout << "切分线路" << i << ": ";
             for (int j = 0; j < seg[i].size(); j ++) {

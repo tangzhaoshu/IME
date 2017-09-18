@@ -4,7 +4,7 @@
 #include<set>
 #include<map>
 #include<vector>
-#include <algorithm>
+#include<algorithm>
 using namespace std;
 
 
@@ -67,12 +67,12 @@ public:
 
     void PrintLog() {
         ofstream fout ("log.txt", ofstream::app);
-		fout << "总字数: " << total_ch << "; 总拼音数:" << total_py << endl;
+		fout << " 总字数  " << total_ch << " 总拼音数 " << total_py << endl;
         for (auto it = pyID.begin(); it != pyID.end(); it ++) {
             fout << it->first << " " << it->second << endl;
         }
         for (auto it = chID.begin(); it != chID.end(); it ++) {
-            fout << it->first << "汉字如下:" << endl;
+            fout << it->first << "汉字如下  " << endl;
             for (int i = 0; i < it->second.size(); i ++) {
                 fout << it->second[i].first << " ";
             }

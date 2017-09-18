@@ -33,9 +33,6 @@
     <ClCompile Include="nineInput.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BigramUP.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="translate.hpp">
@@ -48,6 +45,15 @@
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="Entry.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionGroup.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BigramUP.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TransTree.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
