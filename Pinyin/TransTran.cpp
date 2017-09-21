@@ -26,8 +26,8 @@ public:
 	CBigramNode* m_pChinese;   //当前解码路径在Bigram树上的节点状态
 	CStateNode* m_pNext;
 	CStateNode* m_pParent;
-    int m_nProb;				//当前解码路径的概率
-    int m_nSplit;				//当前解码路径的词条个数
+    unsigned short m_nProb;				//当前解码路径的概率
+    unsigned short m_nSplit;				//当前解码路径的词条个数
 
 	CStateNode() {
 		m_pChinese = NULL;
@@ -113,8 +113,8 @@ bool CompareState(CStateNode* p1, CStateNode* p2) {
 
 class CChineseNode {
 public:
-    int m_nMinSplit;		//解码路径中的最小词条个数
-	int m_nMinProb;			//解码路径中的最大解码概率
+    unsigned short m_nMinSplit;		//解码路径中的最小词条个数
+	unsigned short m_nMinProb;			//解码路径中的最大解码概率
 	char* m_pTransChinese;  //解码的汉字结果
 	CStateNode* m_pLeftFinal;   //有效解码结果路径
 	CStateNode* m_pLeftMid;		//中间解码结果路径
@@ -744,6 +744,8 @@ public:
 			while (pChinese == NULL && pyTotal != 0) {
 				pyNum = pyTotal % 1000 - 100;
 				if (m_nTag[pyNum] == 1) {
+					cout << pyNum << " " << pyTotal << endl;
+					cout <<UTF8ToGBK(pBigramTotal[i]->m_pChinese) << endl;
 					chinese.insert(pBigramTotal[i]->m_pChinese);
 					pChinese = new CChineseNode();
 					flag = 1;
@@ -1144,7 +1146,7 @@ public:
 	void InputStepNew(string str) {
 		m_pSegment->AddStep(str);
 		map<char*, char*> mapSegmentRes = m_pSegment->GetNewResult();
-	//	m_pSegment->Log();
+		m_pSegment->Log();
 		CInputString* pNewInput = new CInputString();
 		CInputString* pLast;
 		pNewInput->m_pInputStr = MergeStr(mapSegmentRes.begin()->first, mapSegmentRes.begin()->second);

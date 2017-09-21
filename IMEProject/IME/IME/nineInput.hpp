@@ -14,7 +14,7 @@
 #include <time.h>
 #include "BigramUP.hpp"
 //#include "PYsegment.cpp"
-#include "PYSegNine.hpp"
+#include "PinyinSegment.hpp"
 //#include "FunctionGroup.cpp"
 
 using namespace std;
@@ -724,80 +724,26 @@ public:
 	}
 };
 
-class CInputNumber {
-public:
-	CInputString** m_pTotalRes;
-	vector<char*> m_vecResult;
-	CInputNumber* m_pNext;
-	int m_nCapacity;
-	int m_nSize;
 
-	CInputNumber() {
-		m_pTotalRes = NULL;
-		m_nSize = 0;
-		m_nCapacity = 0;
-		m_pNext = NULL;
-	}
-	~CInputNumber() {
-		for (int i = 0; i < m_nSize; i++) {
-			m_vecResult[i] = NULL;
-		}
-		m_pNext = NULL;
-		for (int i = 0; i < m_nSize; i++) {
-			m_pTotalRes[i] = NULL;
-		}
-		delete[] m_pTotalRes;
-	}
-
-	void Insert(CInputString* p) {
-		if (m_nSize < m_nCapacity) {
-			m_pTotalRes[m_nSize] = p;
-			m_nSize++;
-			return;
-		}
-		if (m_nCapacity == 0) {
-			m_nCapacity = 1;
-		}
-		else {
-			m_nCapacity += m_nCapacity;
-		}
-		CInputString** arrayTemp = m_pTotalRes;
-		m_pTotalRes = new CInputString*[m_nCapacity];
-		for (int i = 0; i < m_nSize; i++) {
-			m_pTotalRes[i] = arrayTemp[i];
-			arrayTemp[i] = NULL;
-		}
-		delete[] arrayTemp;
-		m_pTotalRes[m_nSize] = p;
-		m_nSize++;
-	}
-
-	void Judge(CChineseNode* p) {
-		for (int i = 0; i < m_nSize; i++) {
-			m_pTotalRes[i]->JudegeChinese(p);
-		}
-	}
-
-};
 
 class CStep {
 public:
 	CInputString* m_pHead;
-	CInputNumber* m_pStep;
 	CBigramTree* m_pBigramRoot;
 	CStepInput* m_pSegment;
 	map<string, string> m_sPinyinId;
 	int m_nTag[500];
 
 	CStep() {
-		m_pStep = NULL;
 		m_pHead = new CInputString();
 		m_pBigramRoot = new CBigramTree();
 		cout << "BigramTree Finish" << endl;
+		// m_pSegment = new CSegment();
 		m_pSegment = new CStepInput();
 		cout << "Segment Finish" << endl;
 		SetPYCH();
 	}
+
 
 	void SetPYCH() {
 		fstream fin("pysource.txt");
@@ -819,7 +765,9 @@ public:
 			}
 		}
 		fin.close();
+
 	}
+
 
 	void SetTag(vector<string> vecID) {
 		for (int i = 0; i < vecID.size(); i++) {
@@ -828,12 +776,12 @@ public:
 		}
 	}
 
+
 	void ClearTag() {
 		for (int i = 0; i < 500; i++) {
 			m_nTag[i] = 0;
 		}
 	}
-
 
 
 	CInputString* FindHistory(char* c) {
@@ -847,33 +795,7 @@ public:
 		return NULL;
 	}
 
-	CInputString* FindCurString(char* c) {
-		if (m_pStep == NULL) {
-			return NULL;
-		}
-		for (int i = 0; i < m_pStep->m_nSize; i++) {
-			if (strcmp(m_pStep->m_pTotalRes[i]->m_pInputStr, c) == 0) {
-				return m_pStep->m_pTotalRes[i];
-			}
-		}
-		return NULL;
-	}
-
-	void DeleteInputString(CInputString* p) {
-
-		CInputString* pStrTemp = m_pHead;
-		while (pStrTemp->m_pNext != NULL) {
-			if (pStrTemp->m_pNext == p) {
-				pStrTemp->m_pNext = p->m_pNext;
-				delete p;
-				break;
-			}
-			pStrTemp = pStrTemp->m_pNext;
-		}
-
-	}
-
-
+	
 	set<char*> InputWithoutHis(CInputString* pCurString) {
 		CStateNode* pState = NULL;
 		CChineseNode* pChinese = NULL;
@@ -895,6 +817,7 @@ public:
 				if (m_nTag[pyNum] == 1) {
 					chinese.insert(pBigramTotal[i]->m_pChinese);
 					pChinese = new CChineseNode();
+					flag = 1;
 					pChinese->m_pTransChinese = GetSubStr(pBigramTotal[i]->m_pChinese, 0, strlen(pBigramTotal[i]->m_pChinese));
 					break;
 				}
@@ -928,6 +851,7 @@ public:
 		return chinese;
 	}
 
+
 	void InputJoint(CInputString* pCurString, CInputString* pLastInput, set<char*> chinese){
 		CStateNode* pState = NULL;
 		CChineseNode* pChinese = NULL;
@@ -956,6 +880,7 @@ public:
 				if (m_nTag[pyNum] == 1) {
 					if (chinese.find(pBigramTotal[i]->m_pChinese) == chinese.end()) {
 						pChinese = new CChineseNode();
+						flag = 1;
 						pChinese->m_pTransChinese = MergeStr(pLastChinese->m_pTransChinese, pBigramTotal[i]->m_pChinese);;
 					}
 					break;
@@ -994,6 +919,7 @@ public:
 		}
 		vecChineseBuff.clear();
 	}
+
 
 	void InputStringNew(CInputString* pCurString, char* history) {
 		CBigramNode* pBigramNode = NULL;
@@ -1162,12 +1088,11 @@ public:
 	}
 
 
-
 	void InputStepNew(string str) {
 		m_pSegment->AddStep(str);
 		map<string, vector<char*>> mapSegmentRes = m_pSegment->GetNewResult();
-		//	cout << "SegmentSize" << mapSegmentRes.size() << endl;
 		//		m_pSegment->Log();
+
 
 		CInputString* pNewInput = new CInputString();
 		CInputString* pLast;
@@ -1203,7 +1128,6 @@ public:
 		m_pHead->m_pNext = pNewInput;
 		pNewInput->SortTrans();
 		pNewInput->Filter();
-
 	}
 
 
@@ -1217,40 +1141,6 @@ public:
 		delete pTemp;
 	}
 
-	void DeleteStepOld() {
-		m_pSegment->DeleteStep();
-		if (m_pHead->m_pNext == NULL) {
-			return;
-		}
-		CInputNumber* pCurStep = m_pStep;
-		for (int i = 0; i < pCurStep->m_nSize; i++) {
-			if (pCurStep->m_pTotalRes[i] != NULL) {
-				DeleteInputString(pCurStep->m_pTotalRes[i]);
-			}
-		}
-		m_pStep = m_pStep->m_pNext;
-		delete pCurStep;
-	}
-
-	void ClearAll() {
-		m_pSegment->ClearAll();
-		CInputString* cur = m_pHead->m_pNext;
-		CInputString* temp;
-		while (cur != NULL) {
-			temp = cur;
-			cur = cur->m_pNext;
-			delete temp;
-		}
-		m_pHead->m_pNext = NULL;
-		CInputNumber* curNumber = m_pStep;
-		CInputNumber* tempNumer;
-		while (curNumber != NULL) {
-			tempNumer = curNumber;
-			curNumber = curNumber->m_pNext;
-			delete tempNumer;
-		}
-		m_pStep = NULL;
-	}
 
 	void PrintLog() {
 		ofstream fout("logNew.txt", ofstream::app);
@@ -1287,6 +1177,7 @@ public:
 		fout.close();
 	}
 
+
 	vector<char*> GetTransRes() {
 		vector<char*> vecResult;
 		if (m_pHead->m_pNext == NULL) {
@@ -1294,7 +1185,6 @@ public:
 			return vecResult;
 		}
 		CInputString* pCurStep = m_pHead->m_pNext;
-		//		cout << pCurStep->m_nTranSize << endl;
 		int flag = 0;
 		for (int i = 0; i < pCurStep->m_nTranSize; i++) {
 			if (pCurStep->m_pTotalRes[i]->m_pLeftFinal != NULL) {

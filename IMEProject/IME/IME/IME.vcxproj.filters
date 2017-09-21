@@ -50,10 +50,10 @@
     <ClInclude Include="PYsegment.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="PySegNine.hpp">
+    <ClInclude Include="nineInput.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="nineInput.hpp">
+    <ClInclude Include="PinyinSegment.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

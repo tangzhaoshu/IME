@@ -57,6 +57,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/Profile %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,7 +90,7 @@
     <ClInclude Include="nineInput.hpp" />
     <ClInclude Include="PCtable.hpp" />
     <ClInclude Include="PYsegment.hpp" />
-    <ClInclude Include="PySegNine.hpp" />
+    <ClInclude Include="PinyinSegment.hpp" />
     <ClInclude Include="pyTrie.hpp" />
     <ClInclude Include="translate.hpp" />
     <ClInclude Include="TransTree.hpp" />

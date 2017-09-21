@@ -7,22 +7,27 @@
 #include <cmath>
 #include <string.h>
 #include <queue>
+#include <windows.h>
 #include "FunctionGroup.cpp"
 
 using namespace std;
 
+int sTOTALSIZE = 0;
 int sTOTALNODE = 0;
 class CBigramNode {
+private:
+
 public:
 	char* m_pChinese;
-	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
-	//int m_nCount;
-	int m_nTransPorb;
-	int m_nID;
 	CBigramNode* m_pParent;
 	CBigramNode** m_pChild;
-	int m_nSize;
-	int m_nCapacity;
+	int m_nID;
+	unsigned short m_nTransPorb;
+	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
+	//int m_nCount;
+	
+	unsigned short m_nSize;
+	unsigned short m_nCapacity;
 
 
 	CBigramNode() {
@@ -49,9 +54,30 @@ public:
 		m_nID = i;
 	}
 
+	CBigramNode(const CBigramNode &c) {
+		sTOTALNODE ++;
+		m_pChinese = c.m_pChinese;
+		m_pParent = c.m_pParent;
+		m_pChild = c.m_pChild;
+		m_nTransPorb = c.m_nTransPorb;
+		m_nState = c.m_nState;
+		m_nID = c.m_nID;
+		m_nSize = c.m_nSize;
+		m_nCapacity = c.m_nCapacity;
+	}
+
+
 	void SetChinese(unsigned short s, char* c) {
 		m_pChinese = c;
 		m_nState = s;
+	}
+
+	void SetSize(int size) {
+		if (size == 0) {
+			return;
+		}
+		m_nCapacity = size;
+		m_pChild = new CBigramNode*[m_nCapacity];
 	}
 
 	~CBigramNode() {
@@ -72,6 +98,17 @@ public:
 		m_pChild = NULL;
 		m_nSize = 0;
 		m_nCapacity = 0;
+	}
+
+	void SumSize() {
+		if (m_pChinese != NULL) {
+			sTOTALSIZE += strlen(m_pChinese) + 1;
+		}
+		sTOTALSIZE += m_nCapacity * sizeof(m_pParent);
+		for (int i = 0; i < m_nSize; i ++) {
+			sTOTALSIZE += sizeof(*m_pChild[i]);
+			m_pChild[i]->SumSize();
+		}
 	}
 
 
@@ -127,7 +164,6 @@ public:
 			mid = (left + right) / 2;
 		}
 		return NULL;
-
 	}
 
 	//单步搜索词条中间节点
@@ -135,7 +171,6 @@ public:
 		if (m_nSize == 0) {
 			return NULL;
 		}
-
 		CBigramNode** arrayNode = m_pChild;
 		for (int i = 0; i < m_nSize; i++) {
 			if (strcmp(arrayNode[i]->m_pChinese, cstr) == 0) {
@@ -236,7 +271,35 @@ public:
 			m_pChild[i]->PrintSource();
 		}
 		fout.close();
+	}
 
+	void PrintAllSource() {
+		ofstream fout ("BigramSourceNew.txt", ofstream::app);
+		stack<CBigramNode*> staChar;
+		CBigramNode* pParent;
+
+		if (m_nState == 1 || m_nState == 3) {
+			if (m_nState == 1) {
+				fout << 1 << endl;
+			}
+			pParent = m_pParent;
+			while (pParent != NULL && pParent->m_nState != 1) {
+				if (pParent->m_pChinese != NULL) {
+					staChar.push(pParent);
+				}
+				pParent = pParent->m_pParent;
+			}
+			while (!staChar.empty()) {
+				fout << staChar.top()->m_pChinese << " ";
+				fout << staChar.top()->m_nSize << " ";
+				staChar.pop();
+			}
+			fout << m_pChinese << " " << m_nSize << " " << m_nTransPorb << endl;
+		}
+		for (int i = 0; i < m_nSize; i++) {
+			m_pChild[i]->PrintAllSource();
+		}
+		fout.close();
 	}
 
 	void PrintLog() {
@@ -361,14 +424,17 @@ public:
 		if (m_nSize == 0) {
 			return;
 		}
-		CBigramNode** arrayNode = m_pChild;
-		m_pChild = new CBigramNode*[m_nSize]();
-		for (int i = 0; i < m_nSize; i++) {
-			m_pChild[i] = arrayNode[i];
-			arrayNode[i] = NULL;
+		if (m_nSize < m_nCapacity) {
+			cout << m_nCapacity << " " << m_nSize << endl;
+			CBigramNode** arrayNode = m_pChild;
+			m_pChild = new CBigramNode*[m_nSize];
+			for (int i = 0; i < m_nSize; i++) {
+				m_pChild[i] = arrayNode[i];
+				arrayNode[i] = NULL;
+			}
+			delete[] arrayNode;
+			m_nCapacity = m_nSize;
 		}
-		delete[] arrayNode;
-		m_nCapacity = m_nSize;
 		QuickSort(m_pChild, 0, m_nSize - 1);
 		for (int i = 0; i < m_nSize; i++) {
 			m_pChild[i]->SortTree();
@@ -392,20 +458,25 @@ public:
 		cout << sizeof(*m_pRoot) << endl;
 		//CreateTree();
 		Create();
+		SumSize();
 	//	SortTree();
 		//SetProb();
 	//	PrintLog();
+	//	PrintAllSource();
 	}
-
 	~CBigramTree() {
 		delete m_pRoot;
 	}
 
-	void PrintSource() {
-		ofstream fout ("BigramSource.txt");
+	void SumSize() {
+		sTOTALSIZE += sizeof(*m_pRoot);
+		m_pRoot->SumSize();
+	}
+	void PrintAllSource() {
+		ofstream fout ("BigramSourceNew.txt");
 		fout << "BigramSource" << endl;
 		fout.close();
-		m_pRoot->PrintSource();
+		m_pRoot->PrintAllSource();
 	}
 
 	void PrintLog() {
@@ -437,7 +508,6 @@ public:
 			}
 			else if (index == 1) {
 				auto ite = m_ChTable.find(str);
-		//		cout << value << StringToInt(value) << endl;
 				if (ite != m_ChTable.end()) {
 					m_ChTable[str] = m_ChTable[str] * 1000 + StringToInt(value);
 				} else {
@@ -607,6 +677,39 @@ public:
 		cur->InsertChild(tempNode);
 	}
 
+	void InsertFirstWordNew(vector<string> vecFirst, int nProb) {
+		CBigramNode* cur = m_pRoot;
+		CBigramNode* tempNode;
+		char* ctemp;
+		for (int i = 0; i < vecFirst.size() - 2; i = i + 2) {
+			ctemp = GetSubStr(vecFirst[i].c_str(), 0, 3);
+			tempNode = cur->FindMidStateObO(ctemp);
+			if (tempNode != NULL) {
+				cur = tempNode;
+				delete[] ctemp;
+			} else {
+				int size = StringToInt(vecFirst[i + 1]);
+				tempNode = new CBigramNode(0, ctemp, m_ChTable[ctemp]);
+				tempNode->SetSize(size);
+				tempNode->m_pParent = cur;
+				cur->InsertChild(tempNode);
+				cur = tempNode;
+			}
+		}
+		ctemp = GetSubStr(vecFirst[vecFirst.size() - 2].c_str(), 0, 3);
+		tempNode = cur->FindNodeObO(ctemp);
+		if (tempNode != NULL) {
+			delete[] ctemp;
+			return;
+		}
+		int size = StringToInt(vecFirst[vecFirst.size() - 1]);
+		tempNode = new CBigramNode(1, ctemp, m_ChTable[ctemp]);
+		tempNode->SetSize(size);
+		tempNode->m_nTransPorb = nProb;
+		tempNode->m_pParent = cur;
+		cur->InsertChild(tempNode);
+	}
+
 	void InsertSecondWord(char* cFirst, char* cSecond, int nProb) {
 		CBigramNode* cur = m_pRoot;
 		CBigramNode* tempNode;
@@ -648,10 +751,65 @@ public:
 		ctemp = GetSubStr(cSecond, strlen(cSecond) - 3, 3);
 		tempNode = cur->FindNodeObO(ctemp);
 		if (tempNode != NULL) {
-			delete[] ctemp;
+		delete[] ctemp;
 			return;
 		}
 		tempNode = new CBigramNode(3, ctemp, m_ChTable[ctemp]);
+		tempNode->m_nTransPorb = nProb;
+		tempNode->m_pParent = cur;
+		cur->InsertChild(tempNode);
+
+	}
+
+	void InsertSecondWordNew(vector<string> vecFirst, vector<string> vecSecond, int nProb) {
+		CBigramNode* cur = m_pRoot;
+		CBigramNode* tempNode;
+		char* ctemp;
+		for (int i = 0; i < vecFirst.size() - 2; i = i + 2) {
+			ctemp = GetSubStr(vecFirst[i].c_str(), 0, 3);
+			tempNode = cur->FindMidStateObO(ctemp);
+			if (tempNode != NULL) {
+				cur = tempNode;
+				delete[] ctemp;
+			} else {
+				cout << "insert error" << endl;
+				return;
+			}
+		}
+		ctemp = GetSubStr(vecFirst[vecFirst.size() - 2].c_str(), 0, 3);
+		tempNode = cur->FindNodeObO(ctemp);
+		if (tempNode != NULL) {
+			cur = tempNode;
+			delete[] ctemp;
+		} else {
+			cout << "insert error" << endl;
+			return;
+		}
+
+		for (int i = 0; i < vecSecond.size() - 2; i = i + 2) {
+			ctemp = GetSubStr(vecSecond[i].c_str(), 0, 3);
+			tempNode = cur->FindMidStateObO(ctemp);
+			if (tempNode != NULL) {
+				cur = tempNode;
+				delete[] ctemp;
+			} else {
+				int size = StringToInt(vecSecond[i + 1]);
+				tempNode = new CBigramNode(2, ctemp, m_ChTable[ctemp]);
+				tempNode->SetSize(size);
+				tempNode->m_pParent = cur;
+				cur->InsertChild(tempNode);
+				cur = tempNode;
+			}
+		}
+		ctemp = GetSubStr(vecSecond[vecSecond.size() - 2].c_str(), 0, 3);
+		tempNode = cur->FindNodeObO(ctemp);
+		if (tempNode != NULL) {
+		delete[] ctemp;
+			return;
+		}
+		int size = StringToInt(vecSecond[vecSecond.size() - 1]);
+		tempNode = new CBigramNode(3, ctemp, m_ChTable[ctemp]);
+		tempNode->SetSize(size);
 		tempNode->m_nTransPorb = nProb;
 		tempNode->m_pParent = cur;
 		cur->InsertChild(tempNode);
@@ -700,6 +858,37 @@ public:
 			}
 		}
 		delete[] cFirst;
+	}
+
+	void CreateNew() {
+		string str;
+		char* cFirst = NULL;
+		char* cSecond = NULL;
+		int nprob;
+		fstream fin("BigramSourceNew.txt");
+		if (!fin) {
+			cout << "open file error" << endl;
+			exit(1);
+		}
+		vector<string> vecStr;
+		vector<string> vecSecond;
+		getline(fin, str);
+		cout << str << endl;
+		while (getline(fin, str)) {
+			if (str == "1") {
+				delete[] cFirst;
+				getline(fin, str);
+				vecStr = SplitStr(str);
+				nprob = StringToInt(vecStr[vecStr.size() - 1]);
+				vecStr.pop_back();
+				InsertFirstWordNew(vecStr, nprob);
+			} else {
+				vecSecond = SplitStr(str);
+				nprob = StringToInt(vecSecond[vecSecond.size() - 1]);
+				vecSecond.pop_back();
+				InsertSecondWordNew(vecStr, vecSecond, nprob);
+			}
+		}
 	}
 
 	/*
@@ -858,12 +1047,28 @@ public:
 
 /*
 int main() {
+	Sleep(5000);
+	int n = 500000;
+	int** x = new int*[n];
+	STestNode** point = new STestNode*[n];
+	for (int i = 0; i < n; i ++) {
+		
+		point[i] = new STestNode();
+		x[i] = new int[1];
+		
+	}
+	CBigramNode* bigram = new CBigramNode();
+	cout << &(*bigram) << endl;
+	cout << &(bigram->m_pChinese) << endl;
+
+	Sleep(5000);
 
     ofstream fout("logNew.txt");
     fout << "start the process" << endl;
     fout.close();
 	CBigramTree* biGramTree = new CBigramTree();
 	cout << sTOTALNODE << endl;
+	cout << sTOTALSIZE << endl;
 	string str;
 	char* cstr;
 	cout << " input " << endl;
@@ -878,6 +1083,7 @@ int main() {
 		}
 		delete[] cstr;
 	}
+	
 	return 0;
 }
 */

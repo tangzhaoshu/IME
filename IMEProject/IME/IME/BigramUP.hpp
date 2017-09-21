@@ -12,18 +12,19 @@
 using namespace std;
 
 
+
+int sTOTALSIZE = 0;
 int sTOTALNODE = 0;
 class CBigramNode {
 public:
 	char* m_pChinese;
-	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
-	//int m_nCount;
-	int m_nTransPorb;
-	int m_nID;
 	CBigramNode* m_pParent;
 	CBigramNode** m_pChild;
-	int m_nSize;
-	int m_nCapacity;
+	int m_nID;
+	unsigned short m_nTransPorb;
+	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
+	unsigned short m_nSize;
+	unsigned short m_nCapacity;
 
 
 	CBigramNode() {
@@ -50,6 +51,19 @@ public:
 		m_nID = i;
 	}
 
+	CBigramNode(const CBigramNode &c) {
+		sTOTALNODE++;
+		m_pChinese = c.m_pChinese;
+		m_pParent = c.m_pParent;
+		m_pChild = c.m_pChild;
+		m_nTransPorb = c.m_nTransPorb;
+		m_nState = c.m_nState;
+		m_nID = c.m_nID;
+		m_nSize = c.m_nSize;
+		m_nCapacity = c.m_nCapacity;
+	}
+
+
 	void SetChinese(unsigned short s, char* c) {
 		m_pChinese = c;
 		m_nState = s;
@@ -75,7 +89,19 @@ public:
 		m_nCapacity = 0;
 	}
 
+	void SumSize() {
+		if (m_pChinese != NULL) {
+			sTOTALSIZE += strlen(m_pChinese) + 1;
+		}
+		sTOTALSIZE += m_nCapacity * sizeof(m_pParent);
+		for (int i = 0; i < m_nSize; i++) {
+			sTOTALSIZE += sizeof(*m_pChild[i]);
+			m_pChild[i]->SumSize();
+		}
+	}
 
+
+	//单步搜索词条终止节点
 	CBigramNode* FindNodeObO(char* cstr) {
 		if (m_nSize == 0) {
 			return NULL;
@@ -92,6 +118,7 @@ public:
 		return NULL;
 	}
 
+	//二分搜索寻找词条终止节点
 	CBigramNode* FindNode(char* cstr) {
 		CBigramNode** arrayNode = m_pChild;
 		if (arrayNode == NULL) {
@@ -126,14 +153,13 @@ public:
 			mid = (left + right) / 2;
 		}
 		return NULL;
-
 	}
 
+	//单步搜索词条中间节点
 	CBigramNode* FindMidStateObO(char* cstr) {
 		if (m_nSize == 0) {
 			return NULL;
 		}
-
 		CBigramNode** arrayNode = m_pChild;
 		for (int i = 0; i < m_nSize; i++) {
 			if (strcmp(arrayNode[i]->m_pChinese, cstr) == 0) {
@@ -145,6 +171,7 @@ public:
 		return NULL;
 	}
 
+	//二分搜索词条中间节点
 	CBigramNode* FindMidState(char* cstr) {
 		CBigramNode** arrayNode = m_pChild;
 		if (arrayNode == NULL) {
@@ -181,6 +208,7 @@ public:
 		return NULL;
 	}
 
+
 	void InsertChild(CBigramNode* b) {
 		if (m_nSize < m_nCapacity) {
 			m_pChild[m_nSize] = b;
@@ -205,6 +233,7 @@ public:
 	}
 
 
+	//输入词条及Bigram转移概率等资源信息
 	void PrintSource() {
 		ofstream fout("BigramSource.txt", ofstream::app);
 		stack<char*> staChar;
@@ -231,14 +260,12 @@ public:
 			m_pChild[i]->PrintSource();
 		}
 		fout.close();
-
 	}
 
 	void PrintLog() {
 		ofstream fout("logNew.txt", ofstream::app);
 		stack<char*> staChar;
 		CBigramNode* pParent;
-		//cout << m_pChinese << endl;
 
 		if (m_nState == 1 || m_nState == 3) {
 			if (m_nState == 3) {
@@ -265,31 +292,9 @@ public:
 		}
 		fout.close();
 	}
-	/*
-	void SetProb() {
-	CBigramNode* cur;
-	CBigramNode** child;
-	stack<CBigramNode*> staNode;
+	
 
-	for (int i = 0; i < m_nSize; i++) {
-	staNode.push(m_pChild[i]);
-	}
-	while (!staNode.empty()) {
-	cur = staNode.top();
-	staNode.pop();
-	child = cur->m_pChild;
-	if (cur->m_nState == 3) {
-	cur->m_nTransPorb = log(static_cast<double>(cur->m_nCount) / static_cast<double>(m_nCount)) * (-1);
-	}
-	else {
-	for (int i = 0; i < cur->m_nSize; i++) {
-	staNode.push(child[i]);
-	}
-	}
-	}
-	}
-	*/
-
+	//根据当前节点获取整个词条字符串
 	char* GetTotalWord() {
 		CBigramNode* pParent = m_pParent;
 		stack<char*> staChar;
@@ -356,8 +361,9 @@ public:
 		if (m_nSize == 0) {
 			return;
 		}
+		cout << m_nCapacity << " " << m_nSize << endl;
 		CBigramNode** arrayNode = m_pChild;
-		m_pChild = new CBigramNode*[m_nSize]();
+		m_pChild = new CBigramNode*[m_nSize];
 		for (int i = 0; i < m_nSize; i++) {
 			m_pChild[i] = arrayNode[i];
 			arrayNode[i] = NULL;
@@ -385,16 +391,20 @@ public:
 		m_pRoot = new CBigramNode();
 		GetChineseTable();
 		cout << sizeof(*m_pRoot) << endl;
-		//CreateTree();
 		Create();
-	//	SortTree();
-		cout << sTOTALNODE;
+	//	SumSize();
+		//	SortTree();
 		//SetProb();
 		//	PrintLog();
 	}
 
 	~CBigramTree() {
 		delete m_pRoot;
+	}
+
+	void SumSize() {
+		sTOTALSIZE += sizeof(*m_pRoot);
+		m_pRoot->SumSize();
 	}
 
 	void PrintSource() {
@@ -433,7 +443,6 @@ public:
 			}
 			else if (index == 1) {
 				auto ite = m_ChTable.find(str);
-				//		cout << value << StringToInt(value) << endl;
 				if (ite != m_ChTable.end()) {
 					m_ChTable[str] = m_ChTable[str] * 1000 + StringToInt(value);
 				}
@@ -448,72 +457,7 @@ public:
 		}
 		fin.close();
 	}
-	/*
-	void InitInsert(char* cstr) {
-	CBigramNode* cur = m_pRoot;
-	CBigramNode* tempNode;
-	char* ctemp;
-	for (int i = 0; i < strlen(cstr) - 3; i = i + 3) {
-	ctemp = GetSubStr(cstr, i, 3);
-	tempNode = cur->FindMidStateObO(ctemp);
-	if (tempNode != NULL) {
-	cur = tempNode;
-	delete[] ctemp;
-	}
-	else {
-	tempNode = new CBigramNode(0, ctemp, m_ChTable[ctemp]);
-	SUM_NODE++;
-	tempNode->m_pParent = cur;
-	cur->InsertChild(tempNode);
-	cur = tempNode;
-	}
-	}
-	ctemp = GetSubStr(cstr, strlen(cstr) - 3, 3);
-	tempNode = cur->FindNodeObO(ctemp);
-	if (tempNode != NULL) {
-	delete[] ctemp;
-	return;
-	}
-	tempNode = new CBigramNode(1, ctemp, m_ChTable[ctemp]);
-	SUM_NODE++;
-	tempNode->m_pParent = cur;
-	cur->InsertChild(tempNode);
-	}
-
-	void InsertWord(CBigramNode* cur, char* cstr) {
-	CBigramNode* tempNode;
-	char* ctemp;
-	for (int i = 0; i < strlen(cstr) - 3; i = i + 3) {
-
-	ctemp = GetSubStr(cstr, i, 3);
-	tempNode = cur->FindMidStateObO(ctemp);
-	if (tempNode != NULL) {
-	cur = tempNode;
-	delete[] ctemp;
-	}
-	else {
-	tempNode = new CBigramNode(2, ctemp, m_ChTable[ctemp]);
-	SUM_NODE++;
-	tempNode->m_pParent = cur;
-	cur->InsertChild(tempNode);
-	cur = tempNode;
-	}
-	}
-	ctemp = GetSubStr(cstr, strlen(cstr) - 3, 3);
-	tempNode = cur->FindNodeObO(ctemp);
-	if (tempNode == NULL) {
-	tempNode = new CBigramNode(3, ctemp, m_ChTable[ctemp]);
-	SUM_NODE++;
-	tempNode->m_pParent = cur;
-	cur->InsertChild(tempNode);
-	}
-	else {
-	delete[] ctemp;
-	}
-	tempNode->AddCount();
-
-	}
-	*/
+	
 
 	bool IsWord(char* cstr) {
 		CBigramNode* cur = m_pRoot;
@@ -543,37 +487,6 @@ public:
 		}
 	}
 
-	/*
-	void InsertBigram(char* cstr) {
-	CBigramNode* cur = m_pRoot;
-	CBigramNode* tempNode;
-	char* ctemp;
-	for (int i = 0; i < strlen(cstr); i = i + 3) {
-	ctemp = GetSubStr(cstr, i, 3);
-	tempNode = cur->FindNodeObO(ctemp);
-	if (tempNode != NULL) {
-	if (i + 3 == strlen(cstr)) {
-	tempNode->AddCount();
-	m_nTotal++;
-	}
-	else{
-	char* cGramWord = GetSubStr(cstr, i + 3, strlen(cstr) - i - 3);
-	if (IsWord(cGramWord) == 1) {
-	InsertWord(tempNode, cGramWord);
-	}
-	delete[] cGramWord;
-	}
-	}
-	tempNode = cur->FindMidStateObO(ctemp);
-	delete[] ctemp;
-	if (tempNode != NULL) {
-	cur = tempNode;
-	}
-	else {
-	break;
-	}
-	}
-	}*/
 
 	void InsertFirstWord(char* cstr, int nProb) {
 		CBigramNode* cur = m_pRoot;
@@ -704,59 +617,6 @@ public:
 		delete[] cFirst;
 	}
 
-	/*
-	void CreateTree() {
-	string str;
-	char* cstr;
-
-	fstream fin("chsource.txt");
-	if (!fin) {
-	cout << "open file error" << endl;
-	exit(1);
-	}
-	int index = 0;
-	while (getline(fin, str)) {
-	if (index % 3 == 1) {
-	cstr = new char[str.length() + 1];
-	strcpy_s(cstr, str.length() + 1, str.c_str());
-	InitInsert(cstr);
-	delete[] cstr;
-	}
-	index++;
-	}
-	fin.close();
-
-	fin.open("word.txt");
-	if (!fin) {
-	cout << "open file error" << endl;
-	exit(1);
-	}
-	while (getline(fin, str)) {
-	cstr = new char[str.length() + 1];
-	strcpy_s(cstr, str.length() + 1, str.c_str());
-	InitInsert(cstr);
-	delete[] cstr;
-	}
-	fin.close();
-
-	fin.open("result.txt");
-	if (!fin) {
-	cout << "open file error" << endl;
-	exit(1);
-	}
-	while (getline(fin, str)) {
-	for (int i = 0; i < str.length(); i = i + 3) {
-	for (int j = i; j < str.length(); j = j + 3) {
-	cstr = new char[str.substr(i, j - i + 3).length() + 1];
-	strcpy_s(cstr, str.substr(i, j - i + 3).length() + 1, str.substr(i, j - i + 3).c_str());
-	InsertBigram(cstr);
-	delete[] cstr;
-	}
-	}
-	}
-	fin.close();
-	}
-	*/
 
 	bool FindWord(char* cstr) {
 		CBigramNode* cur = m_pRoot;
@@ -829,28 +689,6 @@ public:
 		return tempNode;
 	}
 
-	/*
-	void SetProb() {
-	CBigramNode* cur = m_pRoot;
-	CBigramNode** child;
-	stack<CBigramNode*> staNode;
-	staNode.push(cur);
-	while (!staNode.empty()) {
-	cur = staNode.top();
-	staNode.pop();
-	child = cur->m_pChild;
-	if (cur->m_nState == 1) {
-	cur->m_nTransPorb = (-1) * log(static_cast<double>(cur->m_nCount) / static_cast<double>(m_nTotal));
-	cur->SetProb();
-	}
-	else {
-	for (int i = 0; i < cur->m_nSize; i++) {
-	staNode.push(child[i]);
-	}
-	}
-	}
-	}
-	*/
 
 	void SortTree() {
 		m_pRoot->SortTree();

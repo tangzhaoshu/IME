@@ -38,7 +38,7 @@ void TestNew() {
 	char ch;
 	string s;
 	vector<char*> vecSegRes;
-	DWORD dwStart = GetTickCount();
+
 	LARGE_INTEGER litmp;
 	LONGLONG QPart1, QPart2;
 	double dfMinus, dfFreq, dfTim;
@@ -70,6 +70,7 @@ void TestNew() {
 			//     decodeNum ++;
 			pInputStep->DeleteStep();
 		}
+
 		QueryPerformanceCounter(&litmp);
 		QPart2 = litmp.QuadPart;//获得中止值
 		dfMinus = (double)(QPart2 - QPart1);
@@ -78,9 +79,6 @@ void TestNew() {
 		//    DWORD dwUsed = GetTickCount() - dwStart;
 		//    cout << dwUsed / decodeNum << endl;
 	}
-
-	DWORD dwUsed = GetTickCount() - dwStart;
-	cout << dwUsed / decodeNum << endl;
 
 	ofstream fout("log.txt");
 	for (int i = 0; i < decodeRes.size(); i++) {
@@ -128,7 +126,7 @@ void TestNine() {
 			s = "";
 			decodeNum++;
 			s += testData[i][j];
-			pInputStep->InputStepNew(s);
+			pInputStep->InputStepNine(s);
 		}
 		vecSegRes = pInputStep->GetTransRes();
 		if (vecSegRes.size() > 0) {
@@ -163,18 +161,10 @@ void TestNine() {
 }
 
 
-
-
-
-
-
 int main() {
-	
-
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	TestNew();
 //	TestNine();
-	
 	//ofstream fout("logNew.txt");
 	//fout << "开始程序" << endl;
 	//fout.close();

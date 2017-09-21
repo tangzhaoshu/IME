@@ -57,6 +57,33 @@ public:
         }
     }
 
+    void Filter() {
+        if (mTotalSeg.size() <= 512) {
+            return;
+        }
+        int left = 0;
+        int right = mTotalSeg.size() - 1;
+        CNineNode* pTempNode;
+        while (left < right) {
+            while (left < right && mTotalSeg[left]->mSegRes.size() == MinSegNum) {
+                left ++;
+            }
+            while (left < right && mTotalSeg[right]->mSegRes.size() == MinSegNum + 1) {
+                right --;
+            }
+            if (left < right) {
+                pTempNode = mTotalSeg[left];
+                mTotalSeg[left] = mTotalSeg[right];
+                mTotalSeg[right] = pTempNode;
+                pTempNode = NULL;
+            }
+        }
+        for (int i = mTotalSeg.size() - 1; i >= 512; i --) {
+            delete mTotalSeg[i];
+            mTotalSeg.pop_back();
+        }
+    }
+
     vector<string> getChar(string input) {
         vector<string> inputchar;
         if (input[0] < '2' || input[0] > '9') {
@@ -155,13 +182,10 @@ public:
                     } 
                     segtemp.push_back(nineTemp);
                 }
-
-                
             }
         }
         return segtemp;
     }
-
 
 
     void InputNum(string input) {
@@ -210,11 +234,6 @@ public:
         }
         mTotalSeg.clear();
         for (int i = 0; i < segmentRes.size();i ++) {
-            if (mTotalSeg.size() > 1024) {
-                delete segmentRes[i];
-                segmentRes[i] = NULL;
-                continue;
-            }
             if (segmentRes[i]->mSegRes.size() < MinSegNum + 2) {
                 if (mMinSpell == segmentRes[i]->spellPart) {
                     mTotalSeg.push_back(segmentRes[i]);
@@ -255,6 +274,7 @@ public:
         }
         seg = new CSegNine(step.back());
         seg->InputNum(str);
+        seg->Filter();
         step.push_back(seg);
     }
 
@@ -265,9 +285,18 @@ public:
             return result;
         }
         CSegNine *curSeg = step.back();
-        for (int i = 0; i < curSeg->mTotalSeg.size(); i ++) {
-            result.push_back(curSeg->mTotalSeg[i]->mSegRes);
-        }
+        for (int i = 0; i < curSeg->mTotalSeg.size(); i++) {
+			if (curSeg->mTotalSeg[i]->legal == 1 && curSeg->mTotalSeg[i]->mLastPoint->flag == 1) {
+				result.push_back(curSeg->mTotalSeg[i]->mSegRes);
+			}
+		}
+		if (result.size() == 0) {
+			for (int i = 0; i < curSeg->mTotalSeg.size(); i++) {
+				if (curSeg->mTotalSeg[i]->legal == 1) {
+					result.push_back(curSeg->mTotalSeg[i]->mSegRes);
+				}
+			}
+		}
         return result;
     }
 
@@ -356,7 +385,7 @@ public:
             cout << "No Input" << endl;
             return;
         }
-        vector<vector<string>> curSegment = GetLogSegment();
+        vector<vector<string>> curSegment = GetSegment();
         cout << "---------segment result as follow--------------" << endl;
         for (int i = 0; i < curSegment.size(); i ++) {
             for (int j = 0; j < curSegment[i].size(); j ++) {

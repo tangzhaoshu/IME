@@ -13,9 +13,10 @@
 #include <math.h>
 #include <time.h>
 #include "BigramUP.hpp"
-#include "PYsegment.hpp"
+#include "PinyinSegment.hpp"
 
 using namespace std;
+
 
 
 int SCREATE = 0;
@@ -267,40 +268,22 @@ public:
 			}
 			cur = cur->m_pNext;
 		}
-		cur = m_pLeftFinal;
-		if (cur == NULL) {
+		if (m_pLeftFinal == NULL) {
 			m_pLeftFinal = c;
 			m_nMinProb = m_pLeftFinal->m_nProb;
 			m_nMinSplit = m_pLeftFinal->m_nSplit;
 			return;
 		}
-		if (CompareState(c, cur)) {
+		if (CompareState(m_pLeftFinal, cur)) {
+			c->m_pNext = m_pLeftFinal;
+			m_pLeftFinal->m_pParent;
 			m_pLeftFinal = c;
-			c->m_pNext = cur;
-			cur->m_pParent = c;
 			m_nMinProb = m_pLeftFinal->m_nProb;
 			m_nMinSplit = m_pLeftFinal->m_nSplit;
 			return;
 		}
-		while (cur->m_pNext != NULL) {
-			if (CompareState(cur->m_pNext, c)) {
-				cur = cur->m_pNext;
-			}
-			else {
-				break;
-			}
-		}
-		if (cur->m_pNext == NULL) {
-			cur->m_pNext = c;
-			c->m_pParent = cur;
-		}
-		else {
-			CStateNode* tempState = cur->m_pNext;
-			tempState->m_pParent = c;
-			cur->m_pNext = c;
-			c->m_pNext = tempState;
-			c->m_pParent = cur;
-		}
+		cur->m_pNext = c;
+		c->m_pParent = cur;
 		m_nMinProb = m_pLeftFinal->m_nProb;
 		m_nMinSplit = m_pLeftFinal->m_nSplit;
 	}
@@ -517,6 +500,110 @@ public:
 		}
 	}
 
+	void InsertChineseOld(CChineseNode* p) {
+		if (p->m_pLeftFinal == NULL && p->m_pLeftMid == NULL) {
+			delete p;
+			return;
+		}
+		if (m_nTranSize < m_nCapacity) {
+			m_pTotalRes[m_nTranSize] = p;
+			m_nTranSize++;
+			return;
+		}
+		if (m_nCapacity == 0) {
+			m_nCapacity = 1;
+		}
+		else {
+			m_nCapacity += m_nCapacity;
+		}
+		CChineseNode** arrayTemp = m_pTotalRes;
+		m_pTotalRes = new CChineseNode*[m_nCapacity];
+		for (int i = 0; i < m_nTranSize; i++) {
+			m_pTotalRes[i] = arrayTemp[i];
+			arrayTemp[i] = NULL;
+		}
+		delete[] arrayTemp;
+		m_pTotalRes[m_nTranSize] = p;
+		m_nTranSize++;
+	}
+
+	void JudegeChinese(CChineseNode* p) {
+		CStateNode* curState = p->m_pLeftFinal;
+		CStateNode* tempState = NULL;
+		while (curState != NULL) {
+			int flag = 0;
+			for (int i = 0; i < m_nTranSize; i++) {
+				if (m_pTotalRes[i] == NULL) {
+					continue;
+				}
+				tempState = m_pTotalRes[i]->m_pLeftFinal;
+				while (tempState != NULL) {
+					if (tempState->m_pChinese == curState->m_pChinese) {
+						break;
+					}
+					tempState = tempState->m_pNext;
+				}
+				if (tempState != NULL) {
+					if (CompareState(curState, tempState)) {
+						m_pTotalRes[i]->DeleteState(tempState);
+						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
+							delete m_pTotalRes[i];
+							m_pTotalRes[i] = NULL;
+						}
+						break;
+					}
+					else {
+						flag = 1;
+						tempState = curState;
+						curState = curState->m_pNext;
+						p->DeleteState(tempState);
+						break;
+					}
+				}
+			}
+			if (flag == 0) {
+				curState = curState->m_pNext;
+			}
+		}
+		curState = p->m_pLeftMid;
+		tempState = NULL;
+		while (curState != NULL) {
+			int flag = 0;
+			for (int i = 0; i < m_nTranSize; i++) {
+				if (m_pTotalRes[i] == NULL) {
+					continue;
+				}
+				tempState = m_pTotalRes[i]->m_pLeftMid;
+				while (tempState != NULL) {
+					if (tempState->m_pChinese == curState->m_pChinese) {
+						break;
+					}
+					tempState = tempState->m_pNext;
+				}
+				if (tempState != NULL) {
+					if (CompareState(curState, tempState)) {
+						m_pTotalRes[i]->DeleteMidState(tempState);
+						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
+							delete m_pTotalRes[i];
+							m_pTotalRes[i] = NULL;
+						}
+						break;
+					}
+					else {
+						flag = 1;
+						tempState = curState;
+						curState = curState->m_pNext;
+						p->DeleteMidState(tempState);
+						break;
+					}
+				}
+			}
+			if (flag == 0) {
+				curState = curState->m_pNext;
+			}
+		}
+	}
+
 	void InsertChinese(CChineseNode* p) {
 		CStateNode* curState = p->m_pLeftFinal;
 		CStateNode* tempState = NULL;
@@ -624,8 +711,8 @@ public:
 	CInputString* m_pHead;
 	CBigramTree* m_pBigramRoot;
 	CSegment* m_pSegment;
+	CStepInput* m_pSegNine;
 	map<string, string> m_sPinyinId;
-	map<string, vector<string>> m_sChineseId;
 	int m_nTag[500];
 
 	CStep() {
@@ -633,6 +720,7 @@ public:
 		m_pBigramRoot = new CBigramTree();
 		cout << "BigramTree Finish" << endl;
 		m_pSegment = new CSegment();
+		m_pSegNine = new CStepInput();
 		cout << "Segment Finish" << endl;
 		SetPYCH();
 	}
@@ -677,44 +765,8 @@ public:
 			}
 		}
 		fin.close();
-
-		fin.open("chsource.txt");
-		if (!fin) {
-			cout << "open file error" << endl;
-			exit(1);
-		}
-		index = 0;
-		while (getline(fin, str)) {
-			if (index == 0) {
-				key = str;
-				index++;
-			}
-			else if (index == 1) {
-				m_sChineseId[key].push_back(str);
-				index++;
-			}
-			else if (index == 2) {
-				index = 0;
-			}
-		}
-		fin.close();
 	}
 
-	vector<char*> GetChineseCandidate(vector<string> pinyin) {
-		vector<char*> result;
-		string id;
-		string str;
-		for (int i = 0; i < pinyin.size(); i++) {
-			id = m_sPinyinId[pinyin[i]];
-			for (int j = 0; j < m_sChineseId[id].size(); j++) {
-				str = m_sChineseId[id][j];
-				char* cstr = new char[str.length() + 1];
-				strcpy_s(cstr, str.length() + 1, str.c_str());
-				result.push_back(cstr);
-			}
-		}
-		return result;
-	}
 
 	CInputString* FindHistory(char* c) {
 		CInputString* cur = m_pHead;
@@ -740,6 +792,7 @@ public:
 			int flag = 0;
 			if (i > 0 && strcmp(pBigramTotal[i]->m_pChinese, pBigramTotal[i - 1]->m_pChinese) != 0) {
 				pChinese = NULL;
+				flag = 1;
 			}
 			int pyTotal = pBigramTotal[i]->m_nID;
 			int pyNum;
@@ -768,7 +821,8 @@ public:
 				}
 				if (flag == 1){
 					if (pChinese->m_pLeftFinal != NULL || pChinese->m_pLeftMid != NULL) {
-						pCurString->InsertChinese(pChinese);
+						pCurString->JudegeChinese(pChinese);
+						pCurString->InsertChineseOld(pChinese);
 					}
 					else {
 						delete pChinese;
@@ -810,7 +864,7 @@ public:
 					if (chinese.find(pBigramTotal[i]->m_pChinese) == chinese.end()) {
 						pChinese = new CChineseNode();
 						flag = 1;
-						pChinese->m_pTransChinese = MergeStr(pLastChinese->m_pTransChinese, pBigramTotal[i]->m_pChinese);;
+						pChinese->m_pTransChinese = MergeStr(pLastChinese->m_pTransChinese, pBigramTotal[i]->m_pChinese);
 					}
 					break;
 				}
@@ -1017,133 +1071,50 @@ public:
 		InputJoint(pCurString, pLastInput, chinese);
 	}
 
+	void InputStepNine(string str) {
+		m_pSegment->AddStep(str);
+		map<string, vector<char*>> mapSegmentRes = m_pSegNine->GetNewResult();
+		//		m_pSegment->Log();
 
 
-
-	void InputString(CInputString* pCurString, char* history, vector<char*> chinese) {
-		CBigramNode* pBigramNode = NULL;
-		CInputString* pLastInput = NULL;
-		CStateNode* pState = NULL;
-		CChineseNode* pChinese = NULL;
-
-		if (history != NULL && strlen(history) != 0) {
-			pLastInput = FindHistory(history);
+		CInputString* pNewInput = new CInputString();
+		CInputString* pLast;
+		char* pLastInputNum = NULL;
+		if (m_pHead->m_pNext != NULL) {
+			pLastInputNum = m_pHead->m_pNext->m_pInputStr;
 		}
-		if (pLastInput == NULL) {
-			for (int i = 0; i < chinese.size(); i++) {
-				//         cout << chinese[i] << endl;
-				pChinese = new CChineseNode();
-				pChinese->m_pTransChinese = GetSubStr(chinese[i], 0, strlen(chinese[i]));
-				pBigramNode = m_pBigramRoot->GetWord(chinese[i]);
-				if (pBigramNode != NULL) {
-					pState = new CStateNode(pBigramNode);
-					pState->SetSplit(1);
-					pState->SetProb(pBigramNode->m_nTransPorb);
-					pChinese->InsertFinal(pState);
-				}
-				else {
-					cout << "no such word:  " << chinese[i] << endl;
-				}
-				pBigramNode = m_pBigramRoot->GetMidState(chinese[i]);
-				if (pBigramNode != NULL) {
-					pState = new CStateNode(pBigramNode);
-					pChinese->InsertMid(pState);
-				}
-				if (pChinese->m_pLeftFinal != NULL || pChinese->m_pLeftMid != NULL) {
-					pCurString->InsertChinese(pChinese);
-				}
-				else {
-					delete pChinese;
-				}
+		char* cstr = new char[2];
+		cstr[0] = str[0];
+		cstr[1] = '\0';
+		pNewInput->m_pInputStr = MergeStr(pLastInputNum, cstr);
+		for (auto ite = mapSegmentRes.begin(); ite != mapSegmentRes.end(); ite++) {
+			for (int i = 0; i < ite->second.size(); i++) {
+				string strInput(ite->second[i]);
+				vector<string> vecPinyin = m_pSegment->getpy(strInput);
+				SetTag(vecPinyin);
+				delete[] ite->second[i];
 			}
-			return;
-		}
-
-		CChineseNode* pLastChinese = NULL;
-		CStateNode* pLastState = NULL;
-		for (int i = 0; i < chinese.size(); i++) {
-			// cout << chinese[i] << endl;
-			for (int j = 0; j < pLastInput->m_nTranSize; j++){
-				pLastChinese = pLastInput->m_pTotalRes[j];
-				pChinese = new CChineseNode();
-				pChinese->m_pTransChinese = MergeStr(pLastChinese->m_pTransChinese, chinese[i]);
-				pLastState = pLastChinese->m_pLeftFinal;
-				while (pLastState != NULL) {
-					pBigramNode = pLastState->m_pChinese->FindNode(chinese[i]);
-					if (pBigramNode != NULL) {
-						pState = new CStateNode();
-						pState->SetProb(pLastState->m_nProb + pBigramNode->m_nTransPorb);
-						pState->SetSplit(pLastState->m_nSplit + 1);
-						pBigramNode = m_pBigramRoot->GetWord(chinese[i]);
-						pState->m_pChinese = pBigramNode;
-						pChinese->InsertFinal(pState);
-					}
-					else{
-						pBigramNode = m_pBigramRoot->GetWord(chinese[i]);
-						if (pBigramNode != NULL) {
-							pState = new CStateNode(pBigramNode);
-							pState->SetProb(pLastState->m_nProb + pBigramNode->m_nTransPorb);
-							pState->SetSplit(pLastState->m_nSplit + 1);
-							pChinese->InsertFinal(pState);
-						}
-						pBigramNode = m_pBigramRoot->GetMidState(chinese[i]);
-						if (pBigramNode != NULL) {
-							pState = new CStateNode(pBigramNode);
-							pState->SetProb(pLastState->m_nProb);
-							pState->SetSplit(pLastState->m_nSplit);
-							pChinese->InsertMid(pState);
-						}
-					}
-					pBigramNode = pLastState->m_pChinese->FindMidState(chinese[i]);
-					if (pBigramNode != NULL) {
-						pState = new CStateNode(pBigramNode);
-						pState->SetProb(pLastState->m_nProb);
-						pState->SetSplit(pLastState->m_nSplit);
-						pChinese->InsertMid(pState);
-					}
-					pLastState = pLastState->m_pNext;
-				}
-				pLastState = pLastChinese->m_pLeftMid;
-				while (pLastState != NULL) {
-					pBigramNode = pLastState->m_pChinese->FindNode(chinese[i]);
-					if (pBigramNode != NULL) {
-						if (pBigramNode->m_nState == 1) {
-							pState = new CStateNode(pBigramNode);
-							pState->SetProb(pLastState->m_nProb + pBigramNode->m_nTransPorb);
-							pState->SetSplit(pLastState->m_nSplit + 1);
-							pChinese->InsertFinal(pState);
-						}
-						else if (pBigramNode->m_nState == 3) {
-							pState = new CStateNode();
-							pState->SetProb(pLastState->m_nProb + pBigramNode->m_nTransPorb);
-							pState->SetSplit(pLastState->m_nSplit + 1);
-							char* totalWord = pBigramNode->GetTotalWord();
-							pBigramNode = m_pBigramRoot->GetWord(totalWord);
-							delete[] totalWord;
-							pState->m_pChinese = pBigramNode;
-							pChinese->InsertFinal(pState);
-						}
-					}
-					pBigramNode = pLastState->m_pChinese->FindMidState(chinese[i]);
-					if (pBigramNode != NULL) {
-						pState = new CStateNode(pBigramNode);
-						pState->SetProb(pLastState->m_nProb);
-						pState->SetSplit(pLastState->m_nSplit);
-						pChinese->InsertMid(pState);
-					}
-					pLastState = pLastState->m_pNext;
-				}
-				if (pChinese->m_pLeftFinal != NULL || pChinese->m_pLeftMid != NULL) {
-					pCurString->InsertChinese(pChinese);
-				}
-				else{
-					delete pChinese;
-				}
+			char* cLastInput;
+			if (ite->first.size() == 0) {
+				cLastInput = NULL;
 			}
+			else {
+				cLastInput = new char[ite->first.size() + 1];
+				strcpy_s(cLastInput, ite->first.length() + 1, ite->first.c_str());
+			}
+			InputStringNew(pNewInput, cLastInput);
+			delete[] cLastInput;
+			ClearTag();
 		}
+		mapSegmentRes.clear();
+		pNewInput->m_pNext = m_pHead->m_pNext;
+		m_pHead->m_pNext = pNewInput;
+		pNewInput->SortTrans();
+		pNewInput->Filter();
 	}
 
 
+	
 	void InputStepNew(string str) {
 		m_pSegment->AddStep(str);
 		map<char*, char*> mapSegmentRes = m_pSegment->GetNewResult();
@@ -1167,37 +1138,6 @@ public:
 		pNewInput->Filter();
 	}
 
-	void InputStep(string str) {
-		m_pSegment->AddStep(str);
-		map<char*, char*> mapSegmentRes = m_pSegment->GetNewResult();
-		m_pSegment->Log();
-
-		CInputString* pNewInput = new CInputString();
-		CInputString* pLast;
-
-
-		pNewInput->m_pInputStr = MergeStr(mapSegmentRes.begin()->first, mapSegmentRes.begin()->second);
-
-
-		for (auto ite = mapSegmentRes.begin(); ite != mapSegmentRes.end(); ite++) {
-			string strInput(ite->second);
-			vector<string> vecPinyin = m_pSegment->getpy(strInput);
-			vector<char*> vecChinese = GetChineseCandidate(vecPinyin);
-			InputString(pNewInput, ite->first, vecChinese);
-			for (int i = 0; i < vecChinese.size(); i++) {
-				delete[] vecChinese[i];
-			}
-			delete[] ite->first;
-			delete[] ite->second;
-		}
-		mapSegmentRes.clear();
-
-		pNewInput->m_pNext = m_pHead->m_pNext;
-		m_pHead->m_pNext = pNewInput;
-		pNewInput->SortTrans();
-		pNewInput->Filter();
-
-	}
 
 	void DeleteStep() {
 		m_pSegment->DeleteStep();

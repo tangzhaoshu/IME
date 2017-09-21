@@ -17,7 +17,7 @@
 using namespace std;
 
 int main() {
-    ofstream fout("log.txt");
+    ofstream fout("logNew.txt");
     fout << "开始程序" << endl;
     fout.close();
 
@@ -56,6 +56,7 @@ int main() {
             cout << input << endl;
             pInputStep->InputStepNew(s);
             vecSegRes = pInputStep->GetTransRes();
+            pInputStep->PrintLog();
             for (int i = 0; i < vecSegRes.size(); i++) {
                 cout << UTF8ToGBK(vecSegRes[i]);
             }

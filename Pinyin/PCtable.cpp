@@ -231,40 +231,7 @@ public:
 
 
 
-/*
 int main() {
     CHPYTable *cptable = new CHPYTable();
-    cout << cptable->total_ch << "  " << cptable->total_py << endl;
-    map<string, string> pyid = cptable->pyID;
-    cout << pyid.size() << endl;
-//    for (auto it = pyid.begin(); it != pyid.end(); it ++) {
- //       cout << it->first << ":  " << it->second << endl;
- //   } 
-    return 0;
-  //  set<string> pinyin = pinYinTotal();
-   // for (auto it = pinyin.begin(); it != pinyin.end(); it ++) {
-     //   cout << *it << endl;
-    //}
-    //cout << pinyin.size() << endl;
+  
 }
-    string str = "result.txt";
-    string cpfile = "CPTable.txt";
-    set<string> pinyin;
-    vector<CHPY> cp_set = CPTable(str, cpfile);
-    string ch;
-    int count = 0;
-    for (auto it = cp_set.begin(); it != cp_set.end(); it ++) {
-        for (int i = 0; i < (*it).py_vec.size(); i ++) {
-            pinyin.insert((*it).py_vec[i]);
-        }
-    }
-    cout << pinyin.size() << endl;
-    cout << "input chinese" << endl;
-    while (cin >> ch) {
-        if (findCH(cp_set, ch)) {
-            cout << "yes" << endl;
-        } else {
-            cout << "no" << endl;
-        }
-}
-*/

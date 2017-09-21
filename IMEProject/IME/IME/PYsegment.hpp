@@ -15,9 +15,9 @@ class CSegNode{
 public:
 	vector<string> mSegRes;
 	PYNode* mLastPoint;
-	int flag;
+	int legal;
 	CSegNode() {
-		flag = 1; //1:切割合理，0：切割路径不合理；
+		legal = 1; //1:切割合理，0：切割路径不合理；
 		mLastPoint = NULL;
 	}
 
@@ -64,7 +64,7 @@ public:
 		else {
 			vector<CSegNode*> curSegment = step[step.size() - 1];
 			for (int i = 0; i < curSegment.size(); i++) {
-				if (curSegment[i]->flag == 1) {
+				if (curSegment[i]->legal == 1) {
 					if (!curSegment[i]->mLastPoint->next[str[0] - 'a']) {
 						if (cur->next[str[0] - 'a']) {
 							segNodeTemp = new CSegNode();
@@ -94,7 +94,7 @@ public:
 								segNodeTemp->mSegRes.push_back(str);
 								segNodeTemp->mLastPoint = last;
 								if (last->flag == 0) {
-									segNodeTemp->flag = 0;
+									segNodeTemp->legal = 0;
 								}
 								segtemp.push_back(segNodeTemp);
 							}
@@ -114,7 +114,7 @@ public:
 							segNodeTemp->mSegRes.push_back(s + str);
 							segNodeTemp->mLastPoint = last;
 							if (last->flag == 0) {
-								segNodeTemp->flag = 0;
+								segNodeTemp->legal = 0;
 							}
 							segtemp.push_back(segNodeTemp);
 						}
@@ -160,7 +160,7 @@ public:
 		vector<CSegNode*> curSegment = step[step.size() - 1];
 		cout << "       segment result as follow:     " << endl;
 		for (int i = 0; i < curSegment.size(); i++) {
-			if (curSegment[i]->flag == 1) {
+			if (curSegment[i]->legal == 1) {
 				for (int j = 0; j < curSegment[i]->mSegRes.size(); j++) {
 					cout << curSegment[i]->mSegRes[j] << " ";
 				}
@@ -178,7 +178,7 @@ public:
 		vector<string> temp;
 		vector<CSegNode*> curSegment = step[step.size() - 1];
 		for (int i = 0; i < curSegment.size(); i++) {
-			if (curSegment[i]->flag == 1) {
+			if (curSegment[i]->legal == 1) {
 				for (int j = 0; j < curSegment[i]->mSegRes.size(); j++) {
 					temp.push_back(curSegment[i]->mSegRes[j]);
 				}

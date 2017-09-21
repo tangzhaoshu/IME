@@ -378,7 +378,7 @@ void TestNew() {
     DWORD dwUsed = GetTickCount() - dwStart;
     cout << dwUsed / decodeNum << endl;
 
-    ofstream fout("log.txt");
+    ofstream fout("logTest.txt");
     for (int i = 0; i < decodeRes.size(); i ++) {
         fout << decodeRes[i] << endl;
         delete[] decodeRes[i];
@@ -393,6 +393,8 @@ void TestNew() {
 
 
 int main() {
+
+
  //   map<string, string> pyid = getpinyin();
  //   set<string> py;
  //   for (auto ite = pyid.begin(); ite != pyid.end(); ite ++) {
