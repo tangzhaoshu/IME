@@ -20,6 +20,11 @@ public:
             next[i] = NULL;
         }
     }
+	~PYNode() {
+		for (int i = 0; i < 26; i++) {
+			delete next[i];
+		}
+	}
 };
 
 class PYTree{
@@ -27,15 +32,18 @@ public:
     PYNode* root;
     PYTree() {
         root = new PYNode();
+		creat();
     }
     PYTree(set<string> py) {
         root = new PYNode();
         creat();
     }
 
+	~PYTree(){
+		delete root;
+	}
 
 
-    
 
     void insert(string str) {
         PYNode* cur = root;
@@ -230,25 +238,3 @@ public:
     }
 
 };
-/*
-int main() {
-    vector<vector<string>> seg;
-    CHPYTable *table = new CHPYTable();
-    PYTree *tree = new PYTree();
-    tree->creat(table->py);
-    string str;
-    while(cin >> str) {
-        seg = tree->segment(str);
-        for (int i = 0; i < seg.size(); i ++) {
-            for (int j = 0; j < seg[i].size(); j ++) {
-                cout << seg[i][j] << " ";
-            }
-            cout << endl;
-        }
-    }
-
-    return 0;  
-}
-
-
-*/

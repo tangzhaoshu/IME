@@ -38,6 +38,9 @@ public:
     }
 
     ~CSegment() {
+        while (step.size() != 0) {
+            DeleteStep();
+        }
 		delete pytree;
     }
     
@@ -213,7 +216,7 @@ public:
 
     void Log() {
         vector<vector<string>> result = GetSegment();
-        ofstream fout("logNew.txt", ofstream::app);
+        ofstream fout("logTrans.txt", ofstream::app);
         fout << "---------------------音节切分-------------------------" << endl;
         for (int i = 0; i < result.size(); i ++) {
             fout << "切分线路" << i << ": ";

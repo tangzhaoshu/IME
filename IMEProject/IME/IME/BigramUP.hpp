@@ -8,10 +8,7 @@
 #include <string.h>
 #include <queue>
 #include "FunctionGroup.hpp"
-
 using namespace std;
-
-
 
 int sTOTALSIZE = 0;
 int sTOTALNODE = 0;
@@ -20,12 +17,11 @@ public:
 	char* m_pChinese;
 	CBigramNode* m_pParent;
 	CBigramNode** m_pChild;
-	int m_nID;
+	int m_nID;			//汉字对应的拼音ID
 	unsigned short m_nTransPorb;
 	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
 	unsigned short m_nSize;
 	unsigned short m_nCapacity;
-
 
 	CBigramNode() {
 		sTOTALNODE++;
@@ -63,7 +59,6 @@ public:
 		m_nCapacity = c.m_nCapacity;
 	}
 
-
 	void SetChinese(unsigned short s, char* c) {
 		m_pChinese = c;
 		m_nState = s;
@@ -88,18 +83,6 @@ public:
 		m_nSize = 0;
 		m_nCapacity = 0;
 	}
-
-	void SumSize() {
-		if (m_pChinese != NULL) {
-			sTOTALSIZE += strlen(m_pChinese) + 1;
-		}
-		sTOTALSIZE += m_nCapacity * sizeof(m_pParent);
-		for (int i = 0; i < m_nSize; i++) {
-			sTOTALSIZE += sizeof(*m_pChild[i]);
-			m_pChild[i]->SumSize();
-		}
-	}
-
 
 	//单步搜索词条终止节点
 	CBigramNode* FindNodeObO(char* cstr) {
@@ -208,7 +191,6 @@ public:
 		return NULL;
 	}
 
-
 	void InsertChild(CBigramNode* b) {
 		if (m_nSize < m_nCapacity) {
 			m_pChild[m_nSize] = b;
@@ -231,7 +213,6 @@ public:
 		m_pChild[m_nSize] = b;
 		m_nSize++;
 	}
-
 
 	//输入词条及Bigram转移概率等资源信息
 	void PrintSource() {
@@ -263,7 +244,7 @@ public:
 	}
 
 	void PrintLog() {
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logGram.txt", ofstream::app);
 		stack<char*> staChar;
 		CBigramNode* pParent;
 
@@ -292,7 +273,6 @@ public:
 		}
 		fout.close();
 	}
-	
 
 	//根据当前节点获取整个词条字符串
 	char* GetTotalWord() {
@@ -377,34 +357,20 @@ public:
 	}
 };
 
-int SUM_NODE = 0;
-int SUM_WORD = 0;
 
 class CBigramTree {
 public:
-	int m_nTotal;
 	CBigramNode* m_pRoot;
-	map<string, int> m_ChTable;
+	map<string, int> m_ChTable;		//汉字与拼音ID映射表
 
 	CBigramTree() {
-		m_nTotal = 0;
 		m_pRoot = new CBigramNode();
 		GetChineseTable();
-		cout << sizeof(*m_pRoot) << endl;
 		Create();
-	//	SumSize();
-		//	SortTree();
-		//SetProb();
-		//	PrintLog();
 	}
 
 	~CBigramTree() {
 		delete m_pRoot;
-	}
-
-	void SumSize() {
-		sTOTALSIZE += sizeof(*m_pRoot);
-		m_pRoot->SumSize();
 	}
 
 	void PrintSource() {
@@ -415,7 +381,7 @@ public:
 	}
 
 	void PrintLog() {
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logGram.txt");
 		for (auto ite = m_ChTable.begin(); ite != m_ChTable.end(); ite++) {
 			fout << ite->first << "  " << ite->second << endl;
 		}
@@ -457,7 +423,6 @@ public:
 		}
 		fin.close();
 	}
-	
 
 	bool IsWord(char* cstr) {
 		CBigramNode* cur = m_pRoot;
@@ -486,7 +451,6 @@ public:
 			return 1;
 		}
 	}
-
 
 	void InsertFirstWord(char* cstr, int nProb) {
 		CBigramNode* cur = m_pRoot;
@@ -617,7 +581,6 @@ public:
 		delete[] cFirst;
 	}
 
-
 	bool FindWord(char* cstr) {
 		CBigramNode* cur = m_pRoot;
 		CBigramNode* tempNode;
@@ -688,7 +651,6 @@ public:
 		}
 		return tempNode;
 	}
-
 
 	void SortTree() {
 		m_pRoot->SortTree();

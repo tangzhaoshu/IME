@@ -334,17 +334,16 @@ void TestNew() {
     char ch;
     string s;
     vector<char*> vecSegRes;
-    DWORD dwStart = GetTickCount();
     LARGE_INTEGER litmp;
 	LONGLONG QPart1, QPart2;
-	double dfMinus, dfFreq, dfTim;
+    double dfMinus, dfFreq, dfTim;
+    dfMinus = 0.0;
 	QueryPerformanceFrequency(&litmp);
 	dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
 	QueryPerformanceCounter(&litmp);
 	QPart1 = litmp.QuadPart;// 获得初始值
-	
     for (int i = 0; i < testData.size(); i ++) {
-        cout << testData[i] << endl;
+        cout << "拼音输入： " << testData[i] <<endl;
         for (int j = 0; j < testData[i].size(); j ++) {
             s = "";
             decodeNum ++;
@@ -359,24 +358,28 @@ void TestNew() {
 				pResult[j] = vecSegRes[0][j];
 			}
             pResult[len - 1] = '\0';
-			decodeRes.push_back(pResult);
+            decodeRes.push_back(pResult);
+            cout << "解码结果:  " << pResult << endl;
         }
         vecSegRes.clear();
+
         while(!pInputStep->IsEmpty()) {
        //     decodeNum ++;
             pInputStep->DeleteStep();
         }
-        QueryPerformanceCounter(&litmp);
-        QPart2 = litmp.QuadPart;//获得中止值
-        dfMinus = (double)(QPart2 - QPart1);
-        dfTim = dfMinus / dfFreq;// 获得对应的时间值，单位为秒 
-        cout << dfTim / decodeNum << endl;
-    //    DWORD dwUsed = GetTickCount() - dwStart;
-    //    cout << dwUsed / decodeNum << endl;
+
+    //    QueryPerformanceCounter(&litmp);
+    //    QPart2 = litmp.QuadPart;//获得中止值
+    //    dfMinus = (double)(QPart2 - QPart1);
+    //    dfTim = dfMinus / dfFreq;// 获得对应的时间值，单位为秒 
+    //    cout << dfTim / decodeNum << endl;
     }
     
-    DWORD dwUsed = GetTickCount() - dwStart;
-    cout << dwUsed / decodeNum << endl;
+    QueryPerformanceCounter(&litmp);
+    QPart2 = litmp.QuadPart;//获得中止值
+    dfMinus = (double)(QPart2 - QPart1);
+    dfTim = dfMinus / dfFreq;// 获得对应的时间值，单位为秒 
+    cout << dfTim / decodeNum << endl;
 
     ofstream fout("logTest.txt");
     for (int i = 0; i < decodeRes.size(); i ++) {

@@ -11,7 +11,6 @@
 using namespace std;
 
 
-
 class CSegNode{
 public:
 	vector<string> mSegRes;    // 切分路径
@@ -32,6 +31,7 @@ public:
 };
 
 
+//二十六键音节切分
 class CSegment{
 public:
 	vector<vector<CSegNode*>> step;
@@ -42,8 +42,10 @@ public:
 
 	~CSegment() {
 		delete pytree;
+		while (step.size() != 0) {
+			DeleteStep();
+		}
 	}
-
 
 	void AddStep(string str) {
 		PYNode *cur = pytree->root;
@@ -145,6 +147,10 @@ public:
 		return pytree->getpy(str);
 	}
 
+	vector<string> GetFirst(string str) {
+		return pytree->GetSpecial(str);
+	}
+
 	void clear() {
 		if (step.size() == 0) {
 			return;
@@ -220,7 +226,7 @@ public:
 
 	void Log() {
 		vector<vector<string>> result = GetSegment();
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logTrans.txt", ofstream::app);
 		fout << "---------------------音节切分-------------------------" << endl;
 		for (int i = 0; i < result.size(); i++) {
 			fout << "切分线路" << i << ": ";
@@ -234,6 +240,7 @@ public:
 		fout.close();
 	}
 };
+
 
 
 class CSegNine{
@@ -260,6 +267,33 @@ public:
 		delete pytree;
 		for (int i = 0; i < mTotalSeg.size(); i++) {
 			delete mTotalSeg[i];
+		}
+	}
+
+	void Filter() {
+		if (mTotalSeg.size() <= 512) {
+			return;
+		}
+		int left = 0;
+		int right = mTotalSeg.size() - 1;
+		CSegNode* pTempNode;
+		while (left < right) {
+			while (left < right && mTotalSeg[left]->mSegRes.size() == MinSegNum) {
+				left++;
+			}
+			while (left < right && mTotalSeg[right]->mSegRes.size() == MinSegNum + 1) {
+				right--;
+			}
+			if (left < right) {
+				pTempNode = mTotalSeg[left];
+				mTotalSeg[left] = mTotalSeg[right];
+				mTotalSeg[right] = pTempNode;
+				pTempNode = NULL;
+			}
+		}
+		for (int i = mTotalSeg.size() - 1; i >= 512; i--) {
+			delete mTotalSeg[i];
+			mTotalSeg.pop_back();
 		}
 	}
 
@@ -298,7 +332,7 @@ public:
 	}
 
 	//切分路径curSegment 对于输入字符str的切分结果。
-	vector<CSegNode*> InsertChar(CSegNode* curSegment, string str) {
+	vector<CSegNode*> InsertChar(CSegNode *curSegment, string str) {
 		vector<CSegNode*> segtemp;
 		PYNode *cur = pytree->root;
 		CSegNode *nineTemp;
@@ -364,13 +398,10 @@ public:
 					}
 					segtemp.push_back(nineTemp);
 				}
-
-
 			}
 		}
 		return segtemp;
 	}
-
 
 	void InputNum(string input) {
 		PYNode *cur = pytree->root;
@@ -420,11 +451,6 @@ public:
 		}
 		mTotalSeg.clear();
 		for (int i = 0; i < segmentRes.size(); i++) {
-			if (mTotalSeg.size() > 1024) {
-				delete segmentRes[i];
-				segmentRes[i] = NULL;
-				continue;
-			}
 			if (segmentRes[i]->mSegRes.size() < MinSegNum + 2) {
 				if (mMinSpell == segmentRes[i]->spellPart) {
 					mTotalSeg.push_back(segmentRes[i]);
@@ -442,6 +468,7 @@ public:
 	}
 };
 
+//九键音节切分
 class CStepInput {
 public:
 	vector<CSegNine*> step;
@@ -467,6 +494,7 @@ public:
 		}
 		seg = new CSegNine(step.back());
 		seg->InputNum(str);
+		seg->Filter();
 		step.push_back(seg);
 	}
 
@@ -517,32 +545,6 @@ public:
 		return result;
 	}
 
-	map<char*, vector<char*>> GetOldResult() {
-		vector<vector<string>> vecSegment = GetSegment();
-		map<char*, vector<char*>> result;
-		char* history;
-		char* newInput;
-		string str = "";
-		for (int i = 0; i < vecSegment.size(); i++) {
-			str = "";
-			for (int j = 0; j < vecSegment[i].size() - 1; j++) {
-				str = str + vecSegment[i][j];
-			}
-			if (str == "") {
-				history = NULL;
-			}
-			else{
-				history = new char[str.length() + 1];
-				strcpy_s(history, str.length() + 1, str.c_str());
-			}
-			str = vecSegment[i][vecSegment[i].size() - 1];
-			newInput = new char[str.length() + 1];
-			strcpy_s(newInput, str.length() + 1, str.c_str());
-			result[history].push_back(newInput);
-		}
-		return result;
-	}
-
 	vector<vector<string>> GetLogSegment() {
 		vector<vector<string>> result;
 		if (step.size() == 0) {
@@ -577,7 +579,7 @@ public:
 			cout << "No Input" << endl;
 			return;
 		}
-		vector<vector<string>> curSegment = GetLogSegment();
+		vector<vector<string>> curSegment = GetSegment();
 		cout << "---------segment result as follow--------------" << endl;
 		for (int i = 0; i < curSegment.size(); i++) {
 			for (int j = 0; j < curSegment[i].size(); j++) {
@@ -589,7 +591,7 @@ public:
 
 	void Log() {
 		vector<vector<string>> result = GetLogSegment();
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logTrans.txt", ofstream::app);
 		fout << "---------------------音节切分-------------------------" << endl;
 		for (int i = 0; i < result.size(); i++) {
 			fout << "切分线路" << i << ": ";
@@ -607,7 +609,8 @@ public:
 		for (int i = 0; i < step.size(); i++) {
 			delete step[i];
 		}
-		//delete origin->pytree;
+		delete origin->pytree;
+		delete origin;
 	}
 
 };

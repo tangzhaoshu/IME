@@ -8,6 +8,18 @@
 
 using namespace std;
 
+int StringToInt(string str) {
+	if (str.size() == 0) {
+		return 0;
+	}
+	int number = 0;
+	for (int i = 0; i < str.size(); i++) {
+		int n = str[i] - '0';
+		number = number * 10 + n;
+	}
+	return number;
+}
+
 char* GetSubStr(const char* cstr, int left, int len) {
 	int size = len + 1;
 	char* result = new char[size];
@@ -19,14 +31,25 @@ char* GetSubStr(const char* cstr, int left, int len) {
 }
 
 char* MergeStr(const char* lstr, const char* rstr) {
-	int size = strlen(lstr) + strlen(rstr) + 1;
+	int size = 0;
+	int sizel = 0;
+	int sizer = 0;
+	if (lstr != NULL) {
+		sizel = strlen(lstr);
+		size += sizel;
+	}
+	if (rstr != NULL) {
+		sizer = strlen(rstr);
+		size += sizer;
+	}
+	size++;
 	char* result = new char[size];
 	int pos = 0;
-	for (int i = 0; i < strlen(lstr); i++) {
+	for (int i = 0; i < sizel; i++) {
 		result[pos] = lstr[i];
 		pos++;
 	}
-	for (int i = 0; i < strlen(rstr); i++) {
+	for (int i = 0; i < sizer; i++) {
 		result[pos] = rstr[i];
 		pos++;
 	}
@@ -50,4 +73,29 @@ string UTF8ToGBK(const string& strUTF8)
 	delete[]szGBK;
 	delete[]wszGBK;
 	return strTemp;
+}
+
+vector<string> SplitStr(const string str){
+	vector<string> result;
+	if (str.size() == 0) {
+		return result;
+	}
+	int pos = 0;
+	for (int i = 0; i < str.size() - 1; i++) {
+		if (str[i] == ' ') {
+			if (i != pos){
+				result.push_back(str.substr(pos, i - pos));
+			}
+			pos = i + 1;
+		}
+	}
+	if (str[str.size() - 1] != ' ') {
+		result.push_back(str.substr(pos, str.size() - pos));
+	}
+	else {
+		if (pos != str.size() - 1) {
+			result.push_back(str.substr(pos, str.size() - 1 - pos));
+		}
+	}
+	return result;
 }

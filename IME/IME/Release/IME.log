@@ -1,67 +1,85 @@
-﻿生成启动时间为 2017/9/6 17:43:25。
-     1>项目“C:\Users\Administrator\Desktop\IME\IME\IME\IME.vcxproj”在节点 2 上(Build 个目标)。
+﻿生成启动时间为 2017/9/25 9:12:35。
+     1>项目“C:\Users\Administrator\Desktop\IME\IMEProject\IME\IME\IME.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
          D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(76): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(88): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(113): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(170): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(189): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(200): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(202): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PCtable.hpp(207): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(40): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(53): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(72): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(109): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(110): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(114): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(115): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(127): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(168): warning C4018: “>”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(205): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\pyTrie.hpp(207): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(56): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(180): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(203): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(204): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(214): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(224): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(230): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(283): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(296): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(317): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(318): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(329): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(331): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\PYSegNine.cpp(342): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\FunctionGroup.hpp(25): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\FunctionGroup.hpp(29): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\Entry.hpp(30): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\Entry.hpp(57): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(167): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(195): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(227): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(254): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(351): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(375): warning C4018: “<”: 有符号/无符号不匹配
-     1>c:\users\administrator\desktop\ime\ime\ime\BigramUP.hpp(399): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\FunctionGroup.hpp(16): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\FunctionGroup.hpp(84): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(466): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(495): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(525): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(548): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(625): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(651): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\BigramUP.hpp(677): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(50): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(63): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(96): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(133): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(134): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(138): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(139): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(151): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(192): warning C4018: “>”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(229): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\pyTrie.hpp(231): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(72): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(141): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(168): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(170): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(186): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(188): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(204): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(206): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(228): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(230): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(265): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(411): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(426): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(427): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(435): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(451): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(452): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(505): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(511): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(526): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(528): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(551): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(553): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(578): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(607): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(608): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(619): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(621): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\PinyinSegment.hpp(632): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(691): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(855): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(901): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(965): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(1020): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(1048): warning C4018: “<”: 有符号/无符号不匹配
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(1038): warning C4101: “pLast”: 未引用的局部变量
+     1>c:\users\administrator\desktop\ime\imeproject\ime\ime\TransTree.hpp(1082): warning C4101: “pLast”: 未引用的局部变量
+     1>main.cpp(49): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(51): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(80): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(37): warning C4101: “ch”: 未引用的局部变量
+     1>main.cpp(121): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(123): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(154): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(109): warning C4101: “ch”: 未引用的局部变量
+     1>main.cpp(188): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(208): warning C4018: “<”: 有符号/无符号不匹配
+     1>main.cpp(223): warning C4018: “<”: 有符号/无符号不匹配
        Link:
-         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Administrator\Desktop\IME\IME\Release\IME.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Administrator\Desktop\IME\IME\Release\IME.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Administrator\Desktop\IME\IME\Release\IME.lib" /MACHINE:X86 /SAFESEH Release\Bigram.obj
-         Release\main.obj
-         Release\nineInput.obj
-         Release\PYsegment.obj
-         Release\PySegNine.obj
-         Release\pyToCH.obj
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Administrator\Desktop\IME\IMEProject\IME\Release\IME.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Administrator\Desktop\IME\IMEProject\IME\Release\IME.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Administrator\Desktop\IME\IMEProject\IME\Release\IME.lib" /MACHINE:X86 /SAFESEH Release\main.obj
          正在生成代码
          已完成代码的生成
-         IME.vcxproj -> C:\Users\Administrator\Desktop\IME\IME\Release\IME.exe
-     1>已完成生成项目“C:\Users\Administrator\Desktop\IME\IME\IME\IME.vcxproj”(Build 个目标)的操作。
+         IME.vcxproj -> C:\Users\Administrator\Desktop\IME\IMEProject\IME\Release\IME.exe
+     1>已完成生成项目“C:\Users\Administrator\Desktop\IME\IMEProject\IME\IME\IME.vcxproj”(Build 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:02.05
+已用时间 00:00:03.85

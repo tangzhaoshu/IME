@@ -43,8 +43,6 @@ public:
 		delete root;
 	}
 
-
-
     void insert(string str) {
         PYNode* cur = root;
         for (int i = 0; i < str.size(); i ++) {
@@ -125,6 +123,38 @@ public:
         }
         return py;
     }
+
+	vector<string> GetSpecial(string str) {
+		PYNode* cur = root;
+		vector<string> py;
+		if (str == "a" || str == "o" || str == "e") {
+			py.push_back(str);
+			cur = cur->next[str[0] - 'a'];
+			queue<PYNode*> qu;
+			PYNode* temp;
+			for (int i = 0; i < 26; i++) {
+				if (cur->next[i] != NULL) {
+					qu.push(cur->next[i]);
+				}
+			}
+			while (!qu.empty()) {
+				temp = qu.front();
+				qu.pop();
+				if (temp->flag == 1) {
+					py.push_back(temp->pinyin);
+				}
+				for (int i = 0; i < 26; i++) {
+					if (temp->next[i] != NULL) {
+						qu.push(temp->next[i]);
+					}
+				}
+			}
+			return py;
+		}
+		else {
+			return getpy(str);
+		}
+	}
 
     
     vector<vector<string>> filter(vector<vector<string>> seg) {
@@ -236,27 +266,4 @@ public:
         fout.close();
         return filter(seg);
     }
-
 };
-/*
-int main() {
-    vector<vector<string>> seg;
-    CHPYTable *table = new CHPYTable();
-    PYTree *tree = new PYTree();
-    tree->creat(table->py);
-    string str;
-    while(cin >> str) {
-        seg = tree->segment(str);
-        for (int i = 0; i < seg.size(); i ++) {
-            for (int j = 0; j < seg[i].size(); j ++) {
-                cout << seg[i][j] << " ";
-            }
-            cout << endl;
-        }
-    }
-
-    return 0;  
-}
-
-
-*/

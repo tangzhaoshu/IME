@@ -744,8 +744,6 @@ public:
 			while (pChinese == NULL && pyTotal != 0) {
 				pyNum = pyTotal % 1000 - 100;
 				if (m_nTag[pyNum] == 1) {
-					cout << pyNum << " " << pyTotal << endl;
-					cout <<UTF8ToGBK(pBigramTotal[i]->m_pChinese) << endl;
 					chinese.insert(pBigramTotal[i]->m_pChinese);
 					pChinese = new CChineseNode();
 					flag = 1;
@@ -1018,8 +1016,6 @@ public:
 	}
 
 
-	
-
 	void InputString(CInputString* pCurString, char* history, vector<char*> chinese) {
 		CBigramNode* pBigramNode = NULL;
 		CInputString* pLastInput = NULL;
@@ -1146,7 +1142,7 @@ public:
 	void InputStepNew(string str) {
 		m_pSegment->AddStep(str);
 		map<char*, char*> mapSegmentRes = m_pSegment->GetNewResult();
-		m_pSegment->Log();
+		//m_pSegment->Log();
 		CInputString* pNewInput = new CInputString();
 		CInputString* pLast;
 		pNewInput->m_pInputStr = MergeStr(mapSegmentRes.begin()->first, mapSegmentRes.begin()->second);
@@ -1273,7 +1269,7 @@ public:
 
 	bool IsEmpty() {
 		if (m_pHead->m_pNext == NULL) {
-			cout << SCREATE << " " << SDELETE << endl;
+	//		cout << SCREATE << " " << SDELETE << endl;
 			return 1;
 		} else {
 			return 0;

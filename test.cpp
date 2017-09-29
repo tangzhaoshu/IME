@@ -118,6 +118,11 @@ vector<char*> GetChar() {
  
 int main()
 {   
+    int* point = new int(1);
+    cout << *point << endl;
+    delete point;
+    cout << *point << endl;
+    cout << "dudu" <<endl;
     vector<char*> y;
     y = GetChar();
     cout << y.size() << endl;

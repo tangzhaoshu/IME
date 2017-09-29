@@ -15,8 +15,6 @@ using namespace std;
 int sTOTALSIZE = 0;
 int sTOTALNODE = 0;
 class CBigramNode {
-private:
-
 public:
 	char* m_pChinese;
 	CBigramNode* m_pParent;
@@ -25,7 +23,6 @@ public:
 	unsigned short m_nTransPorb;
 	unsigned short m_nState;	//0: 第一个词条的非终止状态，1：第一个词条的终止状态，2：第二个词条的非终止状态，3：第二个词条的终止状态
 	//int m_nCount;
-	
 	unsigned short m_nSize;
 	unsigned short m_nCapacity;
 
@@ -65,7 +62,6 @@ public:
 		m_nSize = c.m_nSize;
 		m_nCapacity = c.m_nCapacity;
 	}
-
 
 	void SetChinese(unsigned short s, char* c) {
 		m_pChinese = c;
@@ -110,7 +106,6 @@ public:
 			m_pChild[i]->SumSize();
 		}
 	}
-
 
 	//单步搜索词条终止节点
 	CBigramNode* FindNodeObO(char* cstr) {
@@ -219,7 +214,6 @@ public:
 		return NULL;
 	}
 
-	
 	void InsertChild(CBigramNode* b) {
 		if (m_nSize < m_nCapacity) {
 			m_pChild[m_nSize] = b;
@@ -242,7 +236,6 @@ public:
 		m_pChild[m_nSize] = b;
 		m_nSize++;
 	}
-
 
 	//输入词条及Bigram转移概率等资源信息
 	void PrintSource() {
@@ -277,7 +270,6 @@ public:
 		ofstream fout ("BigramSourceNew.txt", ofstream::app);
 		stack<CBigramNode*> staChar;
 		CBigramNode* pParent;
-
 		if (m_nState == 1 || m_nState == 3) {
 			if (m_nState == 1) {
 				fout << 1 << endl;
@@ -303,7 +295,7 @@ public:
 	}
 
 	void PrintLog() {
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logGram.txt", ofstream::app);
 		stack<char*> staChar;
 		CBigramNode* pParent;
 		//cout << m_pChinese << endl;
@@ -458,7 +450,7 @@ public:
 		cout << sizeof(*m_pRoot) << endl;
 		//CreateTree();
 		Create();
-		SumSize();
+	//	SumSize();
 	//	SortTree();
 		//SetProb();
 	//	PrintLog();
@@ -480,7 +472,7 @@ public:
 	}
 
 	void PrintLog() {
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logGram.txt");
 		for (auto ite = m_ChTable.begin(); ite != m_ChTable.end(); ite ++) {
 			fout << ite->first << "  " << ite->second << endl;
 		}

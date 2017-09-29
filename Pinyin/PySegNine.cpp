@@ -36,6 +36,7 @@ public:
     PYTree *pytree;
     int MinSegNum;              //当前的最小切分个数
     int mMinSpell;          //当前切分结果中的最小简拼个数
+    
     CSegNine() {
         pytree = new PYTree();
         MinSegNum = 0;
@@ -187,7 +188,6 @@ public:
         return segtemp;
     }
 
-
     void InputNum(string input) {
         PYNode *cur = pytree->root;
         if (input[0] < '2' || input[0] > '9') {
@@ -259,6 +259,15 @@ public:
         m_sInputNum = "";
         origin = new CSegNine();
     }
+
+    ~CStepInput() {
+        for (int i = 0; i < step.size(); i ++) {
+            delete step[i];
+        }
+        delete origin->pytree;
+        delete origin;
+    }
+
     vector<string> getpy(string str) {
         return origin->pytree->getpy(str);
     }
@@ -397,7 +406,7 @@ public:
 
     void Log() {
         vector<vector<string>> result = GetLogSegment();
-        ofstream fout("logNew.txt", ofstream::app);
+        ofstream fout("logTrans.txt", ofstream::app);
         fout << "---------------------音节切分-------------------------" << endl;
         for (int i = 0; i < result.size(); i ++) {
             fout << "切分线路" << i << ": ";
@@ -411,12 +420,6 @@ public:
         fout.close();
     }
 
-    ~CStepInput() {
-        for (int i = 0; i < step.size(); i ++) {
-            delete step[i];
-        }
-        //delete origin->pytree;
-    }
 
 };
 

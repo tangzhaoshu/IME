@@ -12,12 +12,12 @@
 #include <cstdlib>
 #include <math.h>
 #include <time.h>
-#include "TransTran.cpp"
+#include "TranslateTree.cpp"
 
 using namespace std;
 
 int main() {
-    ofstream fout("logNew.txt");
+    ofstream fout("logTrans.txt");
     fout << "开始程序" << endl;
     fout.close();
 
@@ -31,6 +31,7 @@ int main() {
     while (1){
         s = "";
         while (!kbhit()){}
+        int line = 0;
         ch = getch();
         if (27 == ch) {
             break;
@@ -54,11 +55,26 @@ int main() {
             s += ch;
             input += ch;
             cout << input << endl;
-            pInputStep->InputStepNew(s);
+            pInputStep->InputStep(s);
             vecSegRes = pInputStep->GetTransRes();
             pInputStep->PrintLog();
             for (int i = 0; i < vecSegRes.size(); i++) {
                 cout << UTF8ToGBK(vecSegRes[i]);
+            }
+        } else if (ch >= '0' && ch <= '9') {
+            system("cls");
+            s += ch;
+            input += ch;
+            cout << input << endl;
+            pInputStep->InputStepNine(s);
+            vecSegRes = pInputStep->GetTransRes();
+            pInputStep->PrintLog();
+            for (int i = 0; i < vecSegRes.size(); i++) {
+                if (i >= line) {
+                    cout << endl;
+                    line = line + 20;
+                }
+                cout << UTF8ToGBK(vecSegRes[i]) << " ";
             }
         }
     }

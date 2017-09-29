@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6F46032F-8F34-4C1C-9106-78216CEED8D1}</ProjectGuid>
+    <ProjectGuid>{EA98A5D9-8F5D-4157-B49F-8C94B5FEE44F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>IME</RootNamespace>
   </PropertyGroup>
@@ -57,6 +57,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/Profile %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,20 +79,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Bigram.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="nineInput.cpp" />
-    <ClCompile Include="PYsegment.cpp" />
-    <ClCompile Include="PySegNine.cpp" />
-    <ClCompile Include="pyToCH.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigramUP.hpp" />
-    <ClInclude Include="Entry.hpp" />
     <ClInclude Include="FunctionGroup.hpp" />
-    <ClInclude Include="PCtable.hpp" />
+    <ClInclude Include="PinyinSegment.hpp" />
     <ClInclude Include="pyTrie.hpp" />
-    <ClInclude Include="translate.hpp" />
     <ClInclude Include="TransTree.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

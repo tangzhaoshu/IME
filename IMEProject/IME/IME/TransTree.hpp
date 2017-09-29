@@ -2,8 +2,10 @@
 #include <vector>
 #include <fstream>
 #include <map>
+#include <hash_map>
 #include <set>
 #include <string>
+#include <string.h>
 #include <stack>
 #include <conio.h>
 #include <windows.h>
@@ -17,10 +19,8 @@
 
 using namespace std;
 
-
-
-int SCREATE = 0;
-int SDELETE = 0;
+int sNode = 0;
+int sDelete = 0;
 
 class CStateNode {
 public:
@@ -31,6 +31,7 @@ public:
 	int m_nSplit;				//当前解码路径的词条个数
 
 	CStateNode() {
+		sNode++;
 		m_pChinese = NULL;
 		m_pNext = NULL;
 		m_pParent = NULL;
@@ -39,6 +40,7 @@ public:
 	}
 
 	CStateNode(CBigramNode* p) {
+		sNode++;
 		m_pChinese = p;
 		m_pNext = NULL;
 		m_pParent = NULL;
@@ -47,6 +49,7 @@ public:
 	}
 
 	CStateNode(CBigramNode* p, int a, int b) {
+		sNode++;
 		m_pChinese = p;
 		m_pNext = NULL;
 		m_pParent = NULL;
@@ -75,21 +78,21 @@ public:
 		m_pChinese = p;
 	}
 
-	bool operator < (CStateNode* p) {
-		if (m_nSplit == 1 && p->m_nSplit != 1) {
+	bool operator < (const CStateNode& p) {
+		if (m_nSplit == 1 && p.m_nSplit != 1) {
 			return 1;
 		}
-		if (m_nSplit != 1 && p->m_nSplit == 1) {
+		if (m_nSplit != 1 && p.m_nSplit == 1) {
 			return 0;
 		}
-		if (m_nProb < p->m_nProb) {
+		if (m_nProb < p.m_nProb) {
 			return 1;
 		}
 		return 0;
 	}
 
 	~CStateNode() {
-
+		sDelete++;
 		m_pChinese = NULL;
 		m_pNext = NULL;
 		m_pParent = NULL;
@@ -99,18 +102,6 @@ public:
 	}
 };
 
-bool CompareState(CStateNode* p1, CStateNode* p2) {
-	if (p1->m_nSplit == 1 && p2->m_nSplit != 1) {
-		return 1;
-	}
-	if (p1->m_nSplit != 1 && p2->m_nSplit == 1) {
-		return 0;
-	}
-	if (p1->m_nProb < p2->m_nProb) {
-		return 1;
-	}
-	return 0;
-}
 
 class CChineseNode {
 public:
@@ -121,7 +112,6 @@ public:
 	CStateNode* m_pLeftMid;		//中间解码结果路径
 
 	CChineseNode() {
-		SCREATE++;
 		m_nMinSplit = 0;
 		m_nMinProb = 0;
 		m_pTransChinese = NULL;
@@ -130,7 +120,6 @@ public:
 	}
 
 	~CChineseNode() {
-		SDELETE++;
 		CStateNode* cur = m_pLeftFinal;
 		CStateNode* temp;
 		while (cur != NULL) {
@@ -230,7 +219,7 @@ public:
 		}
 		CStateNode* cur = m_pLeftFinal;
 		if (cur->m_pChinese == c->m_pChinese) {
-			if (CompareState(c, cur)) {
+			if (*c < *cur) {
 				m_pLeftFinal = c;
 				c->m_pNext = cur->m_pNext;
 				if (cur->m_pNext != NULL) {
@@ -248,7 +237,7 @@ public:
 		}
 		while (cur->m_pNext != NULL) {
 			if (cur->m_pNext->m_pChinese == c->m_pChinese) {
-				if (CompareState(c, cur->m_pNext)) {
+				if (*c < *(cur->m_pNext)) {
 					CStateNode* tempState = cur->m_pNext;
 					cur->m_pNext = c;
 					c->m_pParent = cur;
@@ -274,9 +263,9 @@ public:
 			m_nMinSplit = m_pLeftFinal->m_nSplit;
 			return;
 		}
-		if (CompareState(m_pLeftFinal, cur)) {
+		if (*c < *m_pLeftFinal) {
 			c->m_pNext = m_pLeftFinal;
-			m_pLeftFinal->m_pParent;
+			m_pLeftFinal->m_pParent = c;
 			m_pLeftFinal = c;
 			m_nMinProb = m_pLeftFinal->m_nProb;
 			m_nMinSplit = m_pLeftFinal->m_nSplit;
@@ -295,7 +284,7 @@ public:
 			return;
 		}
 		if (cur->m_pChinese == c->m_pChinese) {
-			if (CompareState(cur, c)) {
+			if (*cur < *c) {
 				delete c;
 				return;
 			}
@@ -309,10 +298,9 @@ public:
 				return;
 			}
 		}
-
 		while (cur->m_pNext != NULL) {
 			if (cur->m_pNext->m_pChinese == c->m_pChinese) {
-				if (CompareState(cur->m_pNext, c)) {
+				if (*(cur->m_pNext) < *c) {
 					delete c;
 					return;
 				}
@@ -334,48 +322,19 @@ public:
 		c->m_pParent = cur;
 	}
 
-	CStateNode* FindState(CStateNode* p) {
-		CStateNode* cur = m_pLeftFinal;
-		if (cur == NULL) {
-			return NULL;
-		}
-		while (cur != NULL) {
-			if (cur == p) {
-				return cur;
-			}
-			cur = cur->m_pNext;
-		}
-		return NULL;
-	}
-
-	bool operator < (CChineseNode* p) {
-		if (m_nMinSplit == 1 && p->m_nMinSplit != 1) {
+	bool operator < (const CChineseNode& p) {
+		if (m_nMinSplit == 1 && p.m_nMinSplit != 1) {
 			return 1;
 		}
-		if (m_nMinSplit != 1 && p->m_nMinSplit == 1) {
+		if (m_nMinSplit != 1 && p.m_nMinSplit == 1) {
 			return 0;
 		}
-		if (m_nMinProb < p->m_nMinProb) {
+		if (m_nMinProb < p.m_nMinProb) {
 			return 1;
 		}
 		return 0;
 	}
-
 };
-
-bool Compare(CChineseNode* p1, CChineseNode* p2) {
-	if (p1->m_nMinSplit == 1 && p2->m_nMinSplit != 1) {
-		return 1;
-	}
-	if (p1->m_nMinSplit != 1 && p2->m_nMinSplit == 1) {
-		return 0;
-	}
-	if (p1->m_nMinProb < p2->m_nMinProb) {
-		return 1;
-	}
-	return 0;
-}
-
 
 class CInputString {
 public:
@@ -384,6 +343,7 @@ public:
 	CChineseNode** m_pTotalRes; //解码结果
 	int m_nTranSize;  	//当前解码结果个数
 	int m_nCapacity;	//申请空间个数
+	hash_map<CBigramNode*, int> m_Buffer;
 
 	CInputString() {
 		m_nTranSize = 0;
@@ -404,21 +364,19 @@ public:
 		delete[] m_pTotalRes;
 	}
 
-
-
 	int Partition(CChineseNode** Array, int left, int right) {
 		int l = left;
 		int r = right;
 		CChineseNode* temp = Array[r];
 		while (l < r) {
-			while (r > l && Compare(Array[l], temp)) {
+			while (r > l && *Array[l] < *temp) {
 				l++;
 			}
 			if (l < r) {
 				Array[r] = Array[l];
 				r--;
 			}
-			while (r > l && Compare(temp, Array[r])) {
+			while (r > l && *temp < *Array[r]) {
 				r--;
 			}
 			if (l < r) {
@@ -488,6 +446,88 @@ public:
 		m_nTranSize = 3000;
 	}
 
+	void FastJudege(CChineseNode* p) {
+		CStateNode* curState = p->m_pLeftFinal;
+		while (curState != NULL) {
+		//	cout << UTF8ToGBK(curState->m_pChinese->m_pChinese) << endl;
+			auto ite = m_Buffer.find(curState->m_pChinese);
+			if (ite != m_Buffer.end()) {
+				CStateNode* tempState = m_pTotalRes[ite->second]->m_pLeftFinal;
+				while (tempState != NULL) {
+					if (tempState->m_pChinese == curState->m_pChinese) {
+						break;
+					}
+					tempState = tempState->m_pNext;
+				}
+				if (tempState != NULL) {
+					if (*curState < *tempState) {
+						m_pTotalRes[ite->second]->DeleteState(tempState);
+						if (m_pTotalRes[ite->second]->m_pLeftFinal == NULL && m_pTotalRes[ite->second]->m_pLeftMid == NULL) {
+							delete m_pTotalRes[ite->second];
+							m_pTotalRes[ite->second] = NULL;
+						}
+						ite->second = m_nTranSize;
+						curState = curState->m_pNext;
+						break;
+					}
+					else {
+						tempState = curState;
+						curState = curState->m_pNext;
+						p->DeleteState(tempState);
+						break;
+					}
+				}
+				else {
+					cout << "error" << endl;
+				}
+			}
+			else {
+				m_Buffer[curState->m_pChinese] = m_nTranSize;
+				curState = curState->m_pNext;
+			}
+		}
+		curState = p->m_pLeftMid;
+		while (curState != NULL) {
+			auto ite = m_Buffer.find(curState->m_pChinese);
+			if (ite != m_Buffer.end()) {
+				CStateNode* tempState = m_pTotalRes[ite->second]->m_pLeftMid;
+					while (tempState != NULL) {
+						if (tempState->m_pChinese == curState->m_pChinese) {
+							break;
+						}
+						tempState = tempState->m_pNext;
+					}
+					if (tempState != NULL) {
+						if (*curState < *tempState) {
+							m_pTotalRes[ite->second]->DeleteMidState(tempState);
+							if (m_pTotalRes[ite->second]->m_pLeftFinal == NULL && m_pTotalRes[ite->second]->m_pLeftMid == NULL) {
+								delete m_pTotalRes[ite->second];
+								m_pTotalRes[ite->second] = NULL;
+							}
+							curState = curState->m_pNext;
+							ite->second = m_nTranSize;
+							break;
+						}
+						else {
+							tempState = curState;
+							curState = curState->m_pNext;
+							p->DeleteMidState(tempState);
+							break;
+						}
+					}
+					else
+					{
+						cout << "error" << endl;
+					}
+			}
+			else {
+				m_Buffer[curState->m_pChinese] = m_nTranSize;
+				curState = curState->m_pNext;
+			}
+		}
+	}
+
+	//汉字解码结果删除
 	void DeleteChinese(CChineseNode* p) {
 		if (m_nTranSize == 0) {
 			return;
@@ -500,7 +540,7 @@ public:
 		}
 	}
 
-	void InsertChineseOld(CChineseNode* p) {
+	void InsertChinese(CChineseNode* p) {
 		if (p->m_pLeftFinal == NULL && p->m_pLeftMid == NULL) {
 			delete p;
 			return;
@@ -544,7 +584,7 @@ public:
 					tempState = tempState->m_pNext;
 				}
 				if (tempState != NULL) {
-					if (CompareState(curState, tempState)) {
+					if (*curState < *tempState) {
 						m_pTotalRes[i]->DeleteState(tempState);
 						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
 							delete m_pTotalRes[i];
@@ -581,7 +621,7 @@ public:
 					tempState = tempState->m_pNext;
 				}
 				if (tempState != NULL) {
-					if (CompareState(curState, tempState)) {
+					if (curState < tempState) {
 						m_pTotalRes[i]->DeleteMidState(tempState);
 						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
 							delete m_pTotalRes[i];
@@ -602,133 +642,38 @@ public:
 				curState = curState->m_pNext;
 			}
 		}
-	}
-
-	void InsertChinese(CChineseNode* p) {
-		CStateNode* curState = p->m_pLeftFinal;
-		CStateNode* tempState = NULL;
-		while (curState != NULL) {
-			int flag = 0;
-			for (int i = 0; i < m_nTranSize; i++) {
-				if (m_pTotalRes[i] == NULL) {
-					continue;
-				}
-				tempState = m_pTotalRes[i]->m_pLeftFinal;
-				while (tempState != NULL) {
-					if (tempState->m_pChinese == curState->m_pChinese) {
-						break;
-					}
-					tempState = tempState->m_pNext;
-				}
-				if (tempState != NULL) {
-					if (CompareState(curState, tempState)) {
-						m_pTotalRes[i]->DeleteState(tempState);
-						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
-							delete m_pTotalRes[i];
-							m_pTotalRes[i] = NULL;
-						}
-						break;
-					}
-					else {
-						flag = 1;
-						tempState = curState;
-						curState = curState->m_pNext;
-						p->DeleteState(tempState);
-						break;
-					}
-				}
-			}
-			if (flag == 0) {
-				curState = curState->m_pNext;
-			}
-		}
-		curState = p->m_pLeftMid;
-		tempState = NULL;
-		while (curState != NULL) {
-			int flag = 0;
-			for (int i = 0; i < m_nTranSize; i++) {
-				if (m_pTotalRes[i] == NULL) {
-					continue;
-				}
-				tempState = m_pTotalRes[i]->m_pLeftMid;
-				while (tempState != NULL) {
-					if (tempState->m_pChinese == curState->m_pChinese) {
-						break;
-					}
-					tempState = tempState->m_pNext;
-				}
-				if (tempState != NULL) {
-					if (CompareState(curState, tempState)) {
-						m_pTotalRes[i]->DeleteMidState(tempState);
-						if (m_pTotalRes[i]->m_pLeftFinal == NULL && m_pTotalRes[i]->m_pLeftMid == NULL) {
-							delete m_pTotalRes[i];
-							m_pTotalRes[i] = NULL;
-						}
-						break;
-					}
-					else {
-						flag = 1;
-						tempState = curState;
-						curState = curState->m_pNext;
-						p->DeleteMidState(tempState);
-						break;
-					}
-				}
-			}
-			if (flag == 0) {
-				curState = curState->m_pNext;
-			}
-		}
-		if (p->m_pLeftFinal == NULL && p->m_pLeftMid == NULL) {
-			delete p;
-			return;
-		}
-		if (m_nTranSize < m_nCapacity) {
-			m_pTotalRes[m_nTranSize] = p;
-			m_nTranSize++;
-			return;
-		}
-		if (m_nCapacity == 0) {
-			m_nCapacity = 1;
-		}
-		else {
-			m_nCapacity += m_nCapacity;
-		}
-		CChineseNode** arrayTemp = m_pTotalRes;
-		m_pTotalRes = new CChineseNode*[m_nCapacity];
-		for (int i = 0; i < m_nTranSize; i++) {
-			m_pTotalRes[i] = arrayTemp[i];
-			arrayTemp[i] = NULL;
-		}
-		delete[] arrayTemp;
-		m_pTotalRes[m_nTranSize] = p;
-		m_nTranSize++;
 	}
 };
 
 class CStep {
 public:
 	CInputString* m_pHead;
-	CBigramTree* m_pBigramRoot;
-	CSegment* m_pSegment;
-	CStepInput* m_pSegNine;
-	map<string, string> m_sPinyinId;
+	CBigramTree* m_pBigramRoot;	//Bigram树
+	CSegment* m_pSegment;		//二十六键音节切分
+	CStepInput* m_pSegNine;		//九键音节切分
+ 	map<string, string> m_sPinyinId;	//拼音ID映射表
 	int m_nTag[500];
 
 	CStep() {
 		m_pHead = new CInputString();
 		m_pBigramRoot = new CBigramTree();
 		cout << "BigramTree Finish" << endl;
-		m_pSegment = new CSegment();
-		m_pSegNine = new CStepInput();
-		cout << "Segment Finish" << endl;
+		m_pSegment = NULL;
+		m_pSegNine = NULL;
 		SetPYCH();
 	}
 
 	~CStep() {
-		delete m_pHead;
+		CInputString* cur = m_pHead;
+		CInputString* temppoint;
+		while (cur != NULL) {
+			temppoint = cur;
+			cur = cur->m_pNext;
+			delete temppoint;
+		}
 		delete m_pBigramRoot;
 		delete m_pSegment;
+		delete m_pSegNine;
 	}
 
 	void SetTag(vector<string> vecID) {
@@ -743,7 +688,6 @@ public:
 			m_nTag[i] = 0;
 		}
 	}
-
 
 	void SetPYCH() {
 		fstream fin("pysource.txt");
@@ -767,7 +711,6 @@ public:
 		fin.close();
 	}
 
-
 	CInputString* FindHistory(char* c) {
 		CInputString* cur = m_pHead;
 		while (cur->m_pNext != NULL) {
@@ -779,7 +722,7 @@ public:
 		return NULL;
 	}
 
-
+	//无历史输入情况
 	set<char*> InputWithoutHis(CInputString* pCurString) {
 		CStateNode* pState = NULL;
 		CChineseNode* pChinese = NULL;
@@ -788,21 +731,28 @@ public:
 		set<char*> chinese;
 		pBigramTotal = m_pBigramRoot->GetRoot()->m_pChild;
 		nSize = m_pBigramRoot->GetRoot()->m_nSize;
+		vector<CChineseNode*> vecChineseBuff;
 		for (int i = 0; i < nSize; i++) {
 			int flag = 0;
-			if (i > 0 && strcmp(pBigramTotal[i]->m_pChinese, pBigramTotal[i - 1]->m_pChinese) != 0) {
-				pChinese = NULL;
-				flag = 1;
-			}
+			pChinese = NULL;
+		//	if (i > 0 && strcmp(pBigramTotal[i]->m_pChinese, pBigramTotal[i - 1]->m_pChinese) != 0) {
+		//		pChinese = NULL;
+		//		flag = 1;
+		//	}
 			int pyTotal = pBigramTotal[i]->m_nID;
 			int pyNum;
 			while (pChinese == NULL && pyTotal != 0) {
 				pyNum = pyTotal % 1000 - 100;
 				if (m_nTag[pyNum] == 1) {
-					chinese.insert(pBigramTotal[i]->m_pChinese);
-					pChinese = new CChineseNode();
-					flag = 1;
-					pChinese->m_pTransChinese = GetSubStr(pBigramTotal[i]->m_pChinese, 0, strlen(pBigramTotal[i]->m_pChinese));
+					if (vecChineseBuff.size() > 0 && strcmp(vecChineseBuff[vecChineseBuff.size() - 1]->m_pTransChinese, pBigramTotal[i]->m_pChinese) == 0) {
+						pChinese = vecChineseBuff[vecChineseBuff.size() - 1];
+					}
+					else {
+						chinese.insert(pBigramTotal[i]->m_pChinese);
+						pChinese = new CChineseNode();
+						flag = 1;
+						pChinese->m_pTransChinese = GetSubStr(pBigramTotal[i]->m_pChinese, 0, strlen(pBigramTotal[i]->m_pChinese));
+					}
 					break;
 				}
 				pyTotal = pyTotal / 1000;
@@ -821,8 +771,9 @@ public:
 				}
 				if (flag == 1){
 					if (pChinese->m_pLeftFinal != NULL || pChinese->m_pLeftMid != NULL) {
-						pCurString->JudegeChinese(pChinese);
-						pCurString->InsertChineseOld(pChinese);
+		//				cout << UTF8ToGBK(pChinese->m_pTransChinese) << endl;
+		//				pCurString->InsertChinese(pChinese);
+						vecChineseBuff.push_back(pChinese);
 					}
 					else {
 						delete pChinese;
@@ -830,11 +781,15 @@ public:
 					}
 				}
 			}
-
 		}
+		for (int k = 0; k < vecChineseBuff.size(); k++) {
+			pCurString->InsertChinese(vecChineseBuff[k]);
+		}
+		vecChineseBuff.clear();
 		return chinese;
 	}
 
+	//拼接情况
 	void InputJoint(CInputString* pCurString, CInputString* pLastInput, set<char*> chinese){
 		CStateNode* pState = NULL;
 		CChineseNode* pChinese = NULL;
@@ -852,19 +807,27 @@ public:
 		vector<CChineseNode*> vecChineseBuff;
 		for (int i = 0; i < nSize; i++) {
 			int flag = 0;
-			if (i > 0 && strcmp(pBigramTotal[i]->m_pChinese, pBigramTotal[i - 1]->m_pChinese) != 0) {
-				pChinese = NULL;
-				flag = 1;
-			}
+			pChinese = NULL;
+	//		if (i > 0 && strcmp(pBigramTotal[i]->m_pChinese, pBigramTotal[i - 1]->m_pChinese) != 0) {
+	//			pChinese = NULL;
+	//			flag = 1;
+	//		}
 			int pyTotal = pBigramTotal[i]->m_nID;
 			int pyNum;
 			while (pChinese == NULL && pyTotal != 0) {
 				pyNum = pyTotal % 1000 - 100;
 				if (m_nTag[pyNum] == 1) {
 					if (chinese.find(pBigramTotal[i]->m_pChinese) == chinese.end()) {
-						pChinese = new CChineseNode();
-						flag = 1;
-						pChinese->m_pTransChinese = MergeStr(pLastChinese->m_pTransChinese, pBigramTotal[i]->m_pChinese);
+						char* cCurChinese = MergeStr(pLastChinese->m_pTransChinese, pBigramTotal[i]->m_pChinese);
+						if (vecChineseBuff.size() > 0 && strcmp(vecChineseBuff[vecChineseBuff.size() - 1]->m_pTransChinese, cCurChinese) == 0) {
+							pChinese = vecChineseBuff[vecChineseBuff.size() - 1];
+							delete cCurChinese;
+						} 
+						else {
+							pChinese = new CChineseNode();
+							flag = 1;
+							pChinese->m_pTransChinese = cCurChinese;
+						}
 					}
 					break;
 				}
@@ -900,12 +863,13 @@ public:
 
 		}
 		for (int k = 0; k < vecChineseBuff.size(); k++) {
+			pCurString->JudegeChinese(vecChineseBuff[k]);
 			pCurString->InsertChinese(vecChineseBuff[k]);
 		}
 		vecChineseBuff.clear();
 	}
 
-	void InputStringNew(CInputString* pCurString, char* history) {
+	void InputString(CInputString* pCurString, char* history) {
 		CBigramNode* pBigramNode = NULL;
 		CInputString* pLastInput = NULL;
 		CStateNode* pState = NULL;
@@ -925,7 +889,7 @@ public:
 		}
 		CChineseNode* pLastChinese = NULL;
 		CStateNode* pLastState = NULL;
-		for (int i = 0; i < pLastInput->m_nTranSize; i++){
+		for (int i = 0; i < pLastInput->m_nTranSize; i++) {
 			pChinese = NULL;
 			pLastChinese = pLastInput->m_pTotalRes[i];
 			vector<CChineseNode*> vecChineseBuff;
@@ -953,6 +917,7 @@ public:
 							if (pChinese == NULL) {
 								pChinese = new CChineseNode();
 								pChinese->m_pTransChinese = cCurChinese;
+								chinese.insert(pBigramTotal[j]->m_pChinese);
 							}
 							else {
 								delete cCurChinese;
@@ -971,7 +936,7 @@ public:
 							pBigramNode = m_pBigramRoot->GetWord(pBigramTotal[j]->m_pChinese);
 							pState->m_pChinese = pBigramNode;
 							pChinese->InsertFinal(pState);
-							chinese.insert(pBigramTotal[j]->m_pChinese);
+				//			chinese.insert(pBigramTotal[j]->m_pChinese);
 						}
 						else if (pBigramTotal[j]->m_nState == 2) {
 							pState = new CStateNode(pBigramTotal[j]);
@@ -1064,6 +1029,7 @@ public:
 				pLastState = pLastState->m_pNext;
 			}
 			for (int k = 0; k < vecChineseBuff.size(); k++) {
+				pCurString->JudegeChinese(vecChineseBuff[k]);
 				pCurString->InsertChinese(vecChineseBuff[k]);
 			}
 			vecChineseBuff.clear();
@@ -1071,12 +1037,15 @@ public:
 		InputJoint(pCurString, pLastInput, chinese);
 	}
 
+	//九键输入
 	void InputStepNine(string str) {
-		m_pSegment->AddStep(str);
+		if (m_pSegNine == NULL) {
+			m_pSegNine = new CStepInput();
+			m_pSegment = NULL;
+		}
+		m_pSegNine->AddStep(str);
 		map<string, vector<char*>> mapSegmentRes = m_pSegNine->GetNewResult();
-		//		m_pSegment->Log();
-
-
+		//m_pSegNine->Log();
 		CInputString* pNewInput = new CInputString();
 		CInputString* pLast;
 		char* pLastInputNum = NULL;
@@ -1087,10 +1056,11 @@ public:
 		cstr[0] = str[0];
 		cstr[1] = '\0';
 		pNewInput->m_pInputStr = MergeStr(pLastInputNum, cstr);
+		delete[] cstr;
 		for (auto ite = mapSegmentRes.begin(); ite != mapSegmentRes.end(); ite++) {
 			for (int i = 0; i < ite->second.size(); i++) {
 				string strInput(ite->second[i]);
-				vector<string> vecPinyin = m_pSegment->getpy(strInput);
+				vector<string> vecPinyin = m_pSegNine->getpy(strInput);
 				SetTag(vecPinyin);
 				delete[] ite->second[i];
 			}
@@ -1102,7 +1072,7 @@ public:
 				cLastInput = new char[ite->first.size() + 1];
 				strcpy_s(cLastInput, ite->first.length() + 1, ite->first.c_str());
 			}
-			InputStringNew(pNewInput, cLastInput);
+			InputString(pNewInput, cLastInput);
 			delete[] cLastInput;
 			ClearTag();
 		}
@@ -1113,9 +1083,12 @@ public:
 		pNewInput->Filter();
 	}
 
-
-	
-	void InputStepNew(string str) {
+	//二十六键输入
+	void InputStep(string str) {
+		if (m_pSegment == NULL) {
+			m_pSegNine = NULL;
+			m_pSegment = new CSegment();
+		}
 		m_pSegment->AddStep(str);
 		map<char*, char*> mapSegmentRes = m_pSegment->GetNewResult();
 		//	m_pSegment->Log();
@@ -1124,9 +1097,15 @@ public:
 		pNewInput->m_pInputStr = MergeStr(mapSegmentRes.begin()->first, mapSegmentRes.begin()->second);
 		for (auto ite = mapSegmentRes.begin(); ite != mapSegmentRes.end(); ite++) {
 			string strInput(ite->second);
-			vector<string> vecPinyin = m_pSegment->getpy(strInput);
+			vector<string> vecPinyin;
+			if (ite->first == NULL) {
+				vecPinyin = m_pSegment->GetFirst(strInput);
+			}
+			else {
+				vecPinyin = m_pSegment->getpy(strInput);
+			}
 			SetTag(vecPinyin);
-			InputStringNew(pNewInput, ite->first);
+			InputString(pNewInput, ite->first);
 			delete[] ite->first;
 			delete[] ite->second;
 			ClearTag();
@@ -1136,11 +1115,16 @@ public:
 		m_pHead->m_pNext = pNewInput;
 		pNewInput->SortTrans();
 		pNewInput->Filter();
+		pNewInput->m_Buffer.clear();
 	}
 
-
 	void DeleteStep() {
-		m_pSegment->DeleteStep();
+		if (m_pSegment != NULL) {
+			m_pSegment->DeleteStep();
+		}
+		if (m_pSegNine != NULL) {
+			m_pSegNine->DeleteStep();
+		}
 		if (m_pHead->m_pNext == NULL) {
 			return;
 		}
@@ -1150,7 +1134,7 @@ public:
 	}
 
 	void PrintLog() {
-		ofstream fout("logNew.txt", ofstream::app);
+		ofstream fout("logTrans.txt", ofstream::app);
 		if (m_pHead->m_pNext == NULL) {
 			cout << "nothing input" << endl;
 			return;
@@ -1214,7 +1198,7 @@ public:
 
 	bool IsEmpty() {
 		if (m_pHead->m_pNext == NULL) {
-			cout << SCREATE << " " << SDELETE << endl;
+			cout << sNode << " " << sDelete << endl;
 			return 1;
 		}
 		else {

@@ -39,8 +39,6 @@ public:
 		delete root;
     }
 
-    
-
     void insert(string str) {
         PYNode* cur = root;
         for (int i = 0; i < str.size(); i ++) {
@@ -120,7 +118,6 @@ public:
         }
         return py;
     }
-
     
     vector<vector<string>> filter(vector<vector<string>> seg) {
         vector<vector<string>> res;

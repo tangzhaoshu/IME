@@ -19,7 +19,7 @@ using namespace std;
 
 
 void TestNew() {
-    fstream fin("inputNine.txt");
+    fstream fin("Report.txt");
     if(!fin) {
         cout << "open file error" << endl;
         exit(1);
@@ -42,16 +42,17 @@ void TestNew() {
     string s;
     vector<char*> vecSegRes;
     DWORD dwStart = GetTickCount();
+
     LARGE_INTEGER litmp;
 	LONGLONG QPart1, QPart2;
 	double dfMinus, dfFreq, dfTim;
 	QueryPerformanceFrequency(&litmp);
 	dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
 	QueryPerformanceCounter(&litmp);
-	QPart1 = litmp.QuadPart;// 获得初始值
-
+    QPart1 = litmp.QuadPart;// 获得初始值
+    cout << endl;
     for (int i = 0; i < testData.size(); i ++) {
-        cout << testData[i] << endl;
+        cout << "拼音输入： " << testData[i] <<endl;
         for (int j = 0; j < testData[i].size(); j ++) {
             s = "";
             decodeNum ++;
@@ -67,17 +68,22 @@ void TestNew() {
 			}
             pResult[len - 1] = '\0';
             decodeRes.push_back(pResult);
+            cout << "解码结果:  " << pResult << endl;
         }
+        
         vecSegRes.clear();
+
         while(!pInputStep->IsEmpty()) {
             pInputStep->DeleteStep();
         }
-        QueryPerformanceCounter(&litmp);
-        QPart2 = litmp.QuadPart;//获得中止值
-        dfMinus = (double)(QPart2 - QPart1);
-        dfTim = dfMinus / dfFreq;// 获得对应的时间值，单位为秒 
-        cout << dfTim / decodeNum << endl;
+       
     }
+
+    QueryPerformanceCounter(&litmp);
+    QPart2 = litmp.QuadPart;//获得中止值
+    dfMinus = (double)(QPart2 - QPart1);
+    dfTim = dfMinus / dfFreq;// 获得对应的时间值，单位为秒 
+    cout << dfTim / decodeNum << endl;
     DWORD dwUsed = GetTickCount() - dwStart;
     cout << dwUsed / decodeNum << endl;
 
